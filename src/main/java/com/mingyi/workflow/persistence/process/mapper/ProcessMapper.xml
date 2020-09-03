@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mingyi.workflow.persistence.process.mapper.ProcessMapper">
+
+    <select id="selectList" resultType="map">
+        select id, name, deploy_flag, remark, create_user, create_time, update_user, update_time from lk.wf_def_process
+    </select>
+    
+</mapper>
+

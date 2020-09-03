@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<properties>
+		<property name="ckMysqlMap" value="mysql_prod"/>
+	</properties>
+    <settings>
+        <setting name="logPrefix" value="【Mybatis】"/>
+        <setting name="mapUnderscoreToCamelCase" value="true"/>
+        <setting name="defaultStatementTimeout" value="30"/>
+    </settings>
+    <objectWrapperFactory type="com.vbrug.fw4j.core.mybatis.MapWrapperFactory"/>
+    <plugins>
+        <plugin interceptor="com.vbrug.fw4j.core.mybatis.plugin.SqlMonitorInterceptor">
+            <property name="warnMillis" value="5000"/>
+        </plugin>
+    </plugins>
+</configuration>
