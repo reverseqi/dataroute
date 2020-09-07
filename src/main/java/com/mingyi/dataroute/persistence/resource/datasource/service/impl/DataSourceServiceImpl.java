@@ -6,7 +6,6 @@ import com.mingyi.dataroute.persistence.resource.datasource.service.DataSourceSe
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.Map;
 
 /**
  * @author vbrug
@@ -21,10 +20,5 @@ public class DataSourceServiceImpl implements DataSourceService {
     @Override
     public DataSourcePO findById(int id) {
         return mapper.findById(id);
-    }
-
-    @Override
-    public Map<String, Object> findById2(int id) {
-        return mapper.findById2(id);
     }
 }

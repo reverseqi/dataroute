@@ -21,6 +21,8 @@ public class DataSourceFactory {
             new ConcurrentHashMap<>();
 
     /**
+     * 根据Id获取数据源对象
+     *
      * @param dataSourceId 数据源Id
      * @return 数据源连接
      */
@@ -41,12 +43,9 @@ public class DataSourceFactory {
     private static DataSource createDataSource(String dataSourceId) {
         DataSourcePO dsPO = SpringHelp.getBean(DataSourceService.class).findById(Integer.parseInt(dataSourceId));
         Dialect dialect = Dialect.getDBDialect(dsPO.getType());
-        String url = dialect.getJdbcUrl(dsPO.getHost(), dsPO.getPort(), dsPO.getDbname());
-        if (StringUtils.hasText(dsPO.getJdbcParams()))
-            url += "?" + dsPO.getJdbcParams();
         if (StringUtils.hasText(dsPO.getUsername()) && StringUtils.hasText(dsPO.getPassword()))
-            return new PooledDataSource(dialect.jdbcDriver(), url, dsPO.getUsername(), dsPO.getPassword());
-        return new PooledDataSource(dialect.jdbcDriver(), url, null);
+            return new PooledDataSource(dialect.jdbcDriver(), dsPO.getJdbcUrl(), dsPO.getUsername(), dsPO.getPassword());
+        return new PooledDataSource(dialect.jdbcDriver(), dsPO.getJdbcUrl(), null);
     }
 
 

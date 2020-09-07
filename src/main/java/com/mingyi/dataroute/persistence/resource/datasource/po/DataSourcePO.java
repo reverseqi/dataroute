@@ -12,14 +12,13 @@ public class DataSourcePO implements Serializable {
     private static final long serialVersionUID = 8273025228206765276L;
 
     private Integer id;                                // ID
-    private String name;                               // 数据库名称
-    private String host;                               // 地址
-    private Integer port;                              // 端口号
+    private String dsName;                             // 数据源名称
+    private String type;                               // 数据库类型
+    private String driver;                             // 驱动
+    private String jdbcUrl;                            // JDBC连接信息
     private String dbname;                             // 数据库名称
     private String username;                           // 用户名
     private String password;                           // 密码
-    private String jdbcParams;                         // JDBC连接参数
-    private String type;                               // 数据库类型
     private Integer stopFlag;                          // 停用标志（0-否，1-是）
     private String remark;                             // 描述
     private String createUser;                         // 创建用户
@@ -35,28 +34,36 @@ public class DataSourcePO implements Serializable {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getDsName() {
+        return dsName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setDsName(String dsName) {
+        this.dsName = dsName;
     }
 
-    public String getHost() {
-        return host;
+    public String getType() {
+        return type;
     }
 
-    public void setHost(String host) {
-        this.host = host;
+    public void setType(String type) {
+        this.type = type;
     }
 
-    public Integer getPort() {
-        return port;
+    public String getDriver() {
+        return driver;
     }
 
-    public void setPort(Integer port) {
-        this.port = port;
+    public void setDriver(String driver) {
+        this.driver = driver;
+    }
+
+    public String getJdbcUrl() {
+        return jdbcUrl;
+    }
+
+    public void setJdbcUrl(String jdbcUrl) {
+        this.jdbcUrl = jdbcUrl;
     }
 
     public String getDbname() {
@@ -81,22 +88,6 @@ public class DataSourcePO implements Serializable {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public String getJdbcParams() {
-        return jdbcParams;
-    }
-
-    public void setJdbcParams(String jdbcParams) {
-        this.jdbcParams = jdbcParams;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
     }
 
     public Integer getStopFlag() {
