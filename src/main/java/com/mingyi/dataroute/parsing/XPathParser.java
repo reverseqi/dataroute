@@ -1,5 +1,7 @@
 package com.mingyi.dataroute.parsing;
 
+import com.mingyi.dataroute.executor.bsql.BSqlBean;
+import com.vbrug.fw4j.common.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -18,6 +20,7 @@ import javax.xml.xpath.XPathFactory;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class XPathParser {
 
@@ -124,10 +127,8 @@ public class XPathParser {
         NamedNodeMap attributes = node.getAttributes();
         if (attributes != null) {
             for (int i = 0; i < attributes.getLength(); i++) {
-                xNode.getAttributes()
-                        .setProperty(attributes.item(i)
-                                             .getNodeName(), attributes
-                                             .item(i).getNodeValue());
+                xNode.getAttributes().setProperty(attributes.item(i)
+                        .getNodeName(), attributes.item(i).getNodeValue());
             }
         }
 
@@ -136,12 +137,13 @@ public class XPathParser {
             for (int i = 0; i < node.getChildNodes().getLength(); i++) {
                 Node item = node.getChildNodes().item(i);
                 if (item.getNodeType() == 1) {
-                    XNode chid = new XNode();
-                    xNode.getChildren().add(chid);
-                    recursiveParse(chid, item);
+                    XNode child = new XNode();
+                    xNode.getChildren().add(child);
+                    recursiveParse(child, item);
                 }
             }
         }
     }
+
 
 }

@@ -9,6 +9,8 @@ import javax.annotation.Resource;
 import java.util.List;
 
 /**
+ * 抽取Service
+ *
  * @author vbrug
  * @since 1.0.0
  */
@@ -18,19 +20,18 @@ public class ExtractServiceImpl implements ExtractService {
     @Resource
     private ExtractMapper mapper;
 
-
     @Override
-    public ExtractPO findById(Integer nodeId) {
-        return mapper.findById(nodeId);
-    }
-
-    @Override
-    public int updateLastTriggerMaxValue(Integer nodeId, String lastTriggerMaxValue) {
-        return mapper.updateLastTriggerMaxValue(nodeId, lastTriggerMaxValue);
+    public ExtractPO findById(Integer processId, Integer nodeId) {
+        return mapper.findById(processId, nodeId);
     }
 
     @Override
     public List<Integer> selectAllTask() {
         return mapper.selectAllTask();
+    }
+
+    @Override
+    public int updateTriggerValue(Integer processId, Integer nodeId, String triggerValue) {
+        return mapper.updateTriggerValue(processId, nodeId, triggerValue);
     }
 }

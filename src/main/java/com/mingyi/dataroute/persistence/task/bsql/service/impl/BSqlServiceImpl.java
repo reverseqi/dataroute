@@ -19,8 +19,8 @@ public class BSqlServiceImpl implements BSqlService {
     private BSqlMapper mapper;
 
     @Override
-    public BSqlPO findById(Integer nodeId) {
-        return mapper.findById(nodeId);
+    public BSqlPO findById(Integer processId, Integer nodeId) {
+        return mapper.findById(processId, nodeId);
     }
 
     @Override

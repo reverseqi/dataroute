@@ -12,13 +12,22 @@ import java.util.List;
  */
 public interface ExtractService {
 
-    ExtractPO findById(Integer nodeId);
+    /**
+     * 根据主键查询抽取任务详情
+     *
+     * @param processId 流程编号
+     * @param nodeId 节点编号
+     * @return 持久化对象
+     */
+    ExtractPO findById(Integer processId, Integer nodeId);
 
-
-    int updateLastTriggerMaxValue(Integer nodeId, String lastTriggerMaxValue);
-
-
+    /**
+     * 查询所有节点信息
+     * @return
+     */
     List<Integer> selectAllTask();
+
+    int updateTriggerValue(Integer processId, Integer nodeId, String triggerValue);
 
 
 }

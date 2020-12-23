@@ -17,14 +17,20 @@ spring:
     name: dataroute
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://39.105.164.113:3306/lk?characterEncoding=UTF-8
+    url: jdbc:mysql://39.98.169.101:3306/lk?characterEncoding=UTF-8
     username: root
-    password: admin
+    password: oec!Server
+    hikari:
+        minimum-idle: 3
+        maximum-pool-size: 10
+        max-lifetime: 30000
+        connection-test-query: SELECT 1
 
 # server settings
 server:
-  port: 8080
+  port: 9081
   servlet:
+    context-path: /dataroute
     session:
       timeout: 30
   tomcat:

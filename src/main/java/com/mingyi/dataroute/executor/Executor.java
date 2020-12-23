@@ -1,5 +1,7 @@
 package com.mingyi.dataroute.executor;
 
+import com.mingyi.dataroute.context.JobContext;
+
 /**
  * 任务执行接口
  *
@@ -8,6 +10,6 @@ package com.mingyi.dataroute.executor;
  */
 public interface Executor {
 
-    Long execute(Integer id);
+    void execute() throws Exception;
 
 }

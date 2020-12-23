@@ -14,12 +14,12 @@ import java.util.List;
  */
 public interface ExtractMapper {
 
-    @Select("select * from d_task_extract where node_id = #{nodeId}")
-    ExtractPO findById(Integer nodeId);
+    @Select("select * from d_task_extract where node_id = #{nodeId} and process_id = #{processId}")
+    ExtractPO findById(Integer processId, Integer nodeId);
 
     @Select("select node_id from d_task_extract")
     List<Integer> selectAllTask();
 
-    @Update("update d_task_extract set last_trigger_max_value = #{lastTriggerMaxValue} where node_id = #{nodeId}")
-    int updateLastTriggerMaxValue(Integer nodeId, String lastTriggerMaxValue);
+    @Update("update d_task_extract set last_trigger_value = #{triggerValue} where node_id = #{nodeId} and process_id = #{processId}")
+    int updateTriggerValue(Integer processId, Integer nodeId, String triggerValue);
 }

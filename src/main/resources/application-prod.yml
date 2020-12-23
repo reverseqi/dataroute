@@ -4,7 +4,7 @@ params:
 # logging settings
 logging:
   config: classpath:config/logback-spring.xml
-  logdir: /vdata/var/logs/dataroute/
+  log-dir: /home/docker_volumes/dataroute/logs
 
 # mybatis settings
 mybatis:
@@ -16,15 +16,21 @@ spring:
   application:
     name: dataroute
   datasource:
-      driver-class-name: com.mysql.jdbc.Driver
-      url: jdbc:mysql://39.98.169.101:3306/lk?characterEncoding=UTF-8
-      username: root
-      password: oec!Server
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://14.120.5.63:3306/dataroute?characterEncoding=UTF-8
+    username: root
+    password: oec!Server
+    hikari:
+        minimum-idle: 3
+        maximum-pool-size: 10
+        max-lifetime: 30000
+        connection-test-query: SELECT 1
 
 # server settings
 server:
-  port: 8080
+  port: 9081
   servlet:
+    context-path: /dataroute
     session:
       timeout: 30
   tomcat:

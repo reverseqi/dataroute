@@ -54,7 +54,7 @@
 
     <logger name="org.springframework" level="INFO" additivity="true"/>
 
-    <root level="DEBUG">
+    <root level="INFO">
         <appender-ref ref="console"/>
         <appender-ref ref="file_info"/>
         <appender-ref ref="file_error"/>

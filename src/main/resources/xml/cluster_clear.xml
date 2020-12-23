@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bsql xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="bsql.xsd">
+    
+    <insert id="1" description="迁移">
+        insert into va_jqfx_dc.d_feature_import_2 select * from va_jqfx_dc.d_feature_import
+    </insert>
+    
+</bsql>

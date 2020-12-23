@@ -11,7 +11,13 @@ import java.util.List;
 public interface BSqlService {
 
 
-    BSqlPO findById(Integer nodeId);
+    /**
+     * 查询抽取任务
+     *
+     * @param nodeId 节点ID
+     * @return 任务实体
+     */
+    BSqlPO findById(Integer processId, Integer nodeId);
 
     List<Integer> selectAll();
 }

@@ -1,6 +1,8 @@
 package com.vbrug.fw4j.core.thread;
 
-import com.vbrug.fw4j.core.util.HttpUtil;
+
+import com.vbrug.fw4j.common.third.http.HttpUtil;
+import com.vbrug.fw4j.common.thread.FixedThreadPool;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -25,20 +27,19 @@ public class ParallelThreadTest {
                 latch.await();
                 long start = System.currentTimeMillis();
                 result = HttpUtil.doPost(url, param);
-                map.put(Thread.currentThread().getName(), (System.currentTimeMillis()-start));
+                map.put(Thread.currentThread().getName(), (System.currentTimeMillis() - start));
                 lock.countDown();
             } catch (Exception e) {
                 e.printStackTrace();
             }
             System.out.println(result.substring(0, 36));
         };
-        for (int i =0; i< 500; i++)
+        for (int i = 0; i < 500; i++)
             FixedThreadPool.getThreadPoolExecutor().submit(r);
         // System.out.println("---------sleep 10----------");
         Thread.sleep(3000);
         latch.countDown();
         lock.await();
         System.out.println(map);
-        FixedThreadPool.shutdown();
     }
 }

@@ -6,13 +6,18 @@
 	</properties>
     <settings>
         <setting name="logPrefix" value="【Mybatis】"/>
+<!--
+        <setting name="logImpl" value="STDOUT_LOGGING"/>
+-->
         <setting name="mapUnderscoreToCamelCase" value="true"/>
         <setting name="defaultStatementTimeout" value="30"/>
     </settings>
     <objectWrapperFactory type="com.vbrug.fw4j.core.mybatis.MapWrapperFactory"/>
+<!--
     <plugins>
         <plugin interceptor="com.vbrug.fw4j.core.mybatis.plugin.SqlMonitorInterceptor">
             <property name="warnMillis" value="5000"/>
         </plugin>
     </plugins>
+-->
 </configuration>
