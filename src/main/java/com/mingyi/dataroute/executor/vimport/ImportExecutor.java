@@ -18,7 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -69,30 +68,22 @@ public class ImportExecutor implements Executor {
         // 01-初始化锁和队列
         ConcurrentLinkedDeque<List<Map<String, Object>>> deque = new ConcurrentLinkedDeque<>();
         SignalLock lock = new SignalLock(true);
-
+        PCHelper pcHelper = new PCHelper();
         DataSourcePool dsPool = taskContext.getJobContext().getDsPool();
-        List<Producer> producerList = new ArrayList<>();
-        List<Consumer> consumerList = new ArrayList<>();
 
-        // 03-处理生产者线程
+        // 02-处理生产者线程
         ImportProducerHandler producerHandler = new ImportProducerHandler(importPO.getFilePath(), importPO);
-        Producer<List<Map<String, Object>>> producer = new Producer<>(producerHandler, deque, lock, true);
-        producerList.add(producer);
-        producer.start();
-        logger.info("任务--> {}--{}，生产者{}启动，解析文件路径：{}", taskContext.getId(), taskContext.getNodeName(), producer, importPO.getFilePath());
+        pcHelper.addProducer(new Producer<>(producerHandler, deque, lock, true, true));
 
-        // 04-处理消费者线程
+        // 03-处理消费者线程
         ImportConsumerDO consumerDO = new ImportConsumerDO(importPO, dsPool.getDataSource(importPO.getDatasourceId()));
         ImportConsumerHandler consumerHandler = new ImportConsumerHandler(consumerDO, taskContext);
         for (Integer i = 0; i < importPO.getConsumerNumber(); i++) {
-            Consumer<List<Map<String, Object>>> consumer = new Consumer<>(consumerHandler, deque, lock);
-            consumerList.add(consumer);
-            consumer.start();
-            logger.info("任务--> {}--{}，消费者【{}】启动", taskContext.getId(), taskContext.getNodeName(), consumer);
+            pcHelper.addConsumer(new Consumer<>(consumerHandler, deque, lock));
         }
 
         // 05-完成任务
-        PCHelper pcHelper = new PCHelper(producerList, consumerList);
+        pcHelper.start();
         pcHelper.finishProducer();
         pcHelper.finishConsumer();
         producerHandler.close();

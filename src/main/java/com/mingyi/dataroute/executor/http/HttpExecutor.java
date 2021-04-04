@@ -43,7 +43,7 @@ public class HttpExecutor implements Executor {
 
         // 03-执行请求
         new HttpRunner(taskContext, httpPO).run();
-        logger.info("任务--> {}--{}，请求完成, 加锁等待算法回调", taskContext.getId(), taskContext.getNodeName());
+        logger.info("【{}--{}】，请求完成, 加锁等待算法回调", taskContext.getId(), taskContext.getNodeName());
         HttpExecutor.lockMap.put(jobContext.getJobId().toString() + taskContext.getNodeId().toString(), signalLock);
         signalLock.lock();
         try {
@@ -52,7 +52,7 @@ public class HttpExecutor implements Executor {
             signalLock.unlock();
         }
         HttpExecutor.lockMap.remove(jobContext.getJobId().toString() + taskContext.getNodeId().toString());
-        logger.info("任务--> {}--{}，算法回调成功", taskContext.getId(), taskContext.getNodeName());
+        logger.info("【{}--{}】，算法回调成功", taskContext.getId(), taskContext.getNodeName());
     }
 
 }

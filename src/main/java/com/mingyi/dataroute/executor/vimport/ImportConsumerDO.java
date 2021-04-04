@@ -24,7 +24,7 @@ public class ImportConsumerDO {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        this.batchInsertSql = dataSource.getDialect().getInsertSql(po.getTableName(), po.getFields());
+        this.batchInsertSql = dataSource.getDialect().buildInsertSQL(po.getTableName(), po.getFields());
         this.fields = po.getFields();
     }
 

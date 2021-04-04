@@ -1,10 +1,12 @@
 package com.mingyi.dataroute.db.datasource;
 
+import com.mingyi.dataroute.db.JobSqlRunner;
 import com.mingyi.dataroute.db.dialect.Dialect;
 import com.mingyi.dataroute.db.dialect.DialectFactory;
 import org.apache.ibatis.datasource.pooled.PooledDataSource;
 import org.apache.ibatis.datasource.unpooled.UnpooledDataSource;
 
+import java.sql.SQLException;
 import java.util.Properties;
 
 /**
@@ -44,5 +46,9 @@ public class JobDataSource extends PooledDataSource {
             dialect = DialectFactory.createDSDialect(this.getDriver());
         }
         return dialect;
+    }
+
+    public JobSqlRunner getSqlRunner() throws SQLException {
+        return new JobSqlRunner(this.getConnection());
     }
 }

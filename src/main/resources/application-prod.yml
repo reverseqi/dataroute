@@ -4,7 +4,7 @@ params:
 # logging settings
 logging:
   config: classpath:config/logback-spring.xml
-  log-dir: /home/docker_volumes/dataroute/logs
+  log-dir: /mnt/dataroute/logs
 
 # mybatis settings
 mybatis:
@@ -17,7 +17,7 @@ spring:
     name: dataroute
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://14.120.5.63:3306/dataroute?characterEncoding=UTF-8
+    url: jdbc:mysql://192.168.31.27:3306/lk_test?characterEncoding=UTF-8
     username: root
     password: oec!Server
     hikari:

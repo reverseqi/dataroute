@@ -19,20 +19,17 @@ public class ExtractPO implements Serializable {
     private Integer targetDatasource;                  // 目标数据库
     private String targetTable;                        // 目标表
     private String fields;                             // 抽取字段(逗号分割)
-    private String extraFields;                        // 保存的参数字段
-    private String triggerField;                       // 触发字段
-    private String defaultCond;                       // 默认查询条件
-    private String lastTriggerValue;                   // 上次触发值
-    private String primaryKey;                         // 主键字段
+    private String triggerField;                       // 触发条件
+    private String defaultCond;                        // 默认查询条件
     private Integer trimWhitespace;                    // 去除前后空格（0-否，1-是）
     private String handleType;                         // 处理类型（TRUNCATE, APPEND）
-    private Integer bufferInsertSize;                        // 缓存size
-    private Integer bufferFetchSize;                        // 缓存size
-    private Integer retryInterval;                     // 重试间隔（分）
-    private Integer maxRetryTimes;                     // 最大重试次数
+    private Integer bufferFetchSize;                   // 缓存抽取数量
+    private Integer bufferInsertSize;                  // 插入缓存数量
+    private String params;                             // 参数
     private Integer producerNumber;                    // 生产者数量
     private Integer consumerNumber;                    // 消费者数量
-
+    private Integer retryInterval;                     // 重试间隔（分）
+    private Integer maxRetryTimes;                     // 最大重试次数
 
     public Integer getProcessId() {
         return processId;
@@ -90,14 +87,6 @@ public class ExtractPO implements Serializable {
         this.fields = fields;
     }
 
-    public String getExtraFields() {
-        return extraFields;
-    }
-
-    public void setExtraFields(String extraFields) {
-        this.extraFields = extraFields;
-    }
-
     public String getTriggerField() {
         return triggerField;
     }
@@ -112,22 +101,6 @@ public class ExtractPO implements Serializable {
 
     public void setDefaultCond(String defaultCond) {
         this.defaultCond = defaultCond;
-    }
-
-    public String getLastTriggerValue() {
-        return lastTriggerValue;
-    }
-
-    public void setLastTriggerValue(String lastTriggerValue) {
-        this.lastTriggerValue = lastTriggerValue;
-    }
-
-    public String getPrimaryKey() {
-        return primaryKey;
-    }
-
-    public void setPrimaryKey(String primaryKey) {
-        this.primaryKey = primaryKey;
     }
 
     public Integer getTrimWhitespace() {
@@ -146,14 +119,6 @@ public class ExtractPO implements Serializable {
         this.handleType = handleType;
     }
 
-    public Integer getBufferInsertSize() {
-        return bufferInsertSize;
-    }
-
-    public void setBufferInsertSize(Integer bufferInsertSize) {
-        this.bufferInsertSize = bufferInsertSize;
-    }
-
     public Integer getBufferFetchSize() {
         return bufferFetchSize;
     }
@@ -162,20 +127,20 @@ public class ExtractPO implements Serializable {
         this.bufferFetchSize = bufferFetchSize;
     }
 
-    public Integer getRetryInterval() {
-        return retryInterval;
+    public Integer getBufferInsertSize() {
+        return bufferInsertSize;
     }
 
-    public void setRetryInterval(Integer retryInterval) {
-        this.retryInterval = retryInterval;
+    public void setBufferInsertSize(Integer bufferInsertSize) {
+        this.bufferInsertSize = bufferInsertSize;
     }
 
-    public Integer getMaxRetryTimes() {
-        return maxRetryTimes;
+    public String getParams() {
+        return params;
     }
 
-    public void setMaxRetryTimes(Integer maxRetryTimes) {
-        this.maxRetryTimes = maxRetryTimes;
+    public void setParams(String params) {
+        this.params = params;
     }
 
     public Integer getProducerNumber() {
@@ -192,5 +157,21 @@ public class ExtractPO implements Serializable {
 
     public void setConsumerNumber(Integer consumerNumber) {
         this.consumerNumber = consumerNumber;
+    }
+
+    public Integer getRetryInterval() {
+        return retryInterval;
+    }
+
+    public void setRetryInterval(Integer retryInterval) {
+        this.retryInterval = retryInterval;
+    }
+
+    public Integer getMaxRetryTimes() {
+        return maxRetryTimes;
+    }
+
+    public void setMaxRetryTimes(Integer maxRetryTimes) {
+        this.maxRetryTimes = maxRetryTimes;
     }
 }

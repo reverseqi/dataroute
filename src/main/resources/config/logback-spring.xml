@@ -4,23 +4,23 @@
     <!-- spring property -->
     <springProperty scope="context" name="logDir" source="logging.log-dir"/>
     <springProperty scope="context" name="appName" source="spring.application.name"/>
-
+    
     <!-- console settings -->
     <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
         <layout class="ch.qos.logback.classic.PatternLayout">
-            <pattern>%d %-5level [%thread] %logger %line: %msg%n</pattern>
+            <pattern>%d %-5level [%thread] %logger{20} %line: %msg%n</pattern>
         </layout>
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
             <level>INFO</level>
         </filter>
     </appender>
-
+    
     <!-- file_info settings -->
     <appender name="file_info" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${logDir}/${appName}_info.log</file>
         <encoder>
             <charset>UTF-8</charset>
-            <pattern>%d %-5level [%thread] %logger %line: %msg%n</pattern>
+            <pattern>%d %-5level [%thread] %logger{24} %line: %msg%n</pattern>
             <outputPatternAsHeader>true</outputPatternAsHeader>
         </encoder>
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
@@ -32,8 +32,8 @@
             <totalSizeCap>1GB</totalSizeCap>
         </rollingPolicy>
     </appender>
-
-
+    
+    
     <!-- file_error settings -->
     <appender name="file_error" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${logDir}/${appName}_error.log</file>

@@ -12,6 +12,7 @@ import com.vbrug.workflow.bean.NodeBean;
 import com.vbrug.workflow.bean.ResultBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StopWatch;
 
 import java.util.List;
 import java.util.Map;
@@ -90,18 +91,27 @@ public class WorkFlowCallService {
             new Thread(() -> {
                 TaskContext currentTaskContext = new TaskContext.Builder(nodeBean.getId(), nodeBean.getName(), jobContext, nodeBean.getType()).build();
                 logger.info("【{}-{}】，开始执行", currentTaskContext.getId(), currentTaskContext.getNodeName());
+                StopWatch stopWatch = new StopWatch();
+                stopWatch.start();
                 jobContext.putTaskContext(currentTaskContext);
                 nodeBean.getFromNodeList().forEach(x -> currentTaskContext.getLastTaskContextList().add(jobContext.findTaskContext(x)));
                 try {
                     ExecutorFactory.createExecutor(nodeBean.getType(), currentTaskContext).execute();
                 } catch (Exception e) {
                     failTaskMonitorMap.put(currentTaskContext.getId(), currentTaskContext);
-                    logger.error("【{}-{}】 执行失败。{}", currentTaskContext.getId(), currentTaskContext.getNodeName(), e);
+                    stopWatch.stop();
+                    logger.error("【{}-{}】 任务耗时：{}, 执行失败。{}", currentTaskContext.getId(), currentTaskContext.getNodeName(), stopWatch.getTotalTimeSeconds(), e);
                     return;
                 }
-                logger.info("【{}-{}】，结束", currentTaskContext.getId(), currentTaskContext.getNodeName());
+                stopWatch.stop();
+                logger.info("【{}-{}】，结束，任务耗时：{}", currentTaskContext.getId(), currentTaskContext.getNodeName(), stopWatch.getTotalTimeSeconds());
                 if (!jobContext.isStop()) {
-                    WorkFlowCallService.getNextTask(currentTaskContext);
+                    try {
+                        WorkFlowCallService.getNextTask(currentTaskContext);
+                    } catch (Exception e) {
+                        logger.error("【{}-{}】 工作流调用发生异常。{}", currentTaskContext.getId(), currentTaskContext.getNodeName(), stopWatch.getTotalTimeSeconds(), e);
+                        return;
+                    }
                 } else {
                     logger.info("------------ -V- -V- -V- 作业【{}-{}】停止，不再执行后续任务 -V- -V- -V- ------------", jobContext.getJobId(), jobContext.getJobName());
                 }

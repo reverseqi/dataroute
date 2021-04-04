@@ -1,15 +1,9 @@
 package com.mingyi.dataroute.db.dialect;
 
-import com.mingyi.dataroute.exceptions.DataRouteException;
+import com.mingyi.dataroute.db.SQL;
 import com.vbrug.fw4j.common.util.CollectionUtils;
 import com.vbrug.fw4j.common.util.DateUtils;
-import com.vbrug.fw4j.common.util.IOUtils;
-import com.vbrug.fw4j.common.util.StringUtils;
-import org.apache.ibatis.jdbc.SQL;
 
-import java.io.InputStreamReader;
-import java.sql.*;
-import java.sql.Date;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -21,49 +15,97 @@ import java.util.stream.Collectors;
  */
 public interface Dialect {
 
-    /**
-     * 获取抽取sql
-     */
-    String getExtractSql(String tableName, String fieldNames, String triggerDateField, String keyField, String defaultCond, Integer bufferSize);
+    JdbcDriverType getDialectType();
 
     /**
-     * 获取抽取sql
+     * 构建查询SQL
      */
-    String getExtractSql(String tableName, String fieldNames, String triggerDateField, String defaultCond);
-
-    /**
-     * 获取表中日期字段最大值
-     */
-    default String getMaxTimeSql(String tableName, String timeField, String defaultCond){
-        String selectSql = new SQL(){{
-            SELECT("max("+timeField+") max_"+timeField, "min("+timeField+") min_"+timeField);
-            FROM(tableName);
-        }}.toString();
-        if (StringUtils.hasText(defaultCond))
-            selectSql += " where " + defaultCond;
-        return selectSql;
+    default String buildQuerySQL(String table, String[] columns, String... conditions) {
+        return buildQuerySQL(table, null, columns, conditions);
     }
 
+    /**
+     * 构建查询SQL
+     */
+    default String buildQuerySQL(String table, String orderColumn, String[] columns, String... conditions) {
+        return new SQL() {{
+            SELECT(columns);
+            FROM(table);
+            WHERE(conditions);
+            ORDER_BY(orderColumn);
+        }}.toString();
+    }
 
     /**
-     * List集合转为String
+     * 构建分页SQL
+     */
+    default String buildQueryPageSQL(String table, String orderColumn, String[] columns, int page, int size, String... conditions) {
+        return buildQuerySQL(table, orderColumn, columns, conditions) + " LIMIT " + page + ", " + size;
+    }
+
+    /**
+     * 构建Top查询SQL
+     */
+    default String buildQueryTopSQL(String table, String orderColumn, String[] columns, int size, String... conditions) {
+        return buildQuerySQL(table, orderColumn, columns, conditions) + " LIMIT " + size;
+    }
+
+    /**
+     * 构建删除SQL
+     */
+    default String buildDeleteSQL(String table, String... conditions) {
+        return new SQL() {{
+            DELETE_FROM(table);
+            WHERE(conditions);
+        }}.toString();
+    }
+
+    /**
+     * 构建截断SQL
+     */
+    default String buildTruncateSQL(String tableName) {
+        return "truncate table " + tableName;
+    }
+
+    /**
+     * 构建插入sql
+     */
+    default String buildInsertSQL(String table, String... columns) {
+        return new SQL() {{
+            INSERT_INTO(table);
+            INTO_COLUMNS(columns);
+        }}.toString();
+    }
+
+    /**
+     * 将值或字段转为数据库日期类型
+     */
+    String vfString2Date(String vf);
+
+    /**
+     * 将值或字段数据库日期类型转为字符串
+     */
+    String vfDate2String(String vf);
+
+    /**
+     * 将JdbcType集合转为String
      *
-     * @param dataList 数据源
+     * @param jdbcResultList 数据源
      * @return List<Map < String, String>>
      */
-    default List<Map<String, String>> result2String(List<Map<String, Object>> dataList) {
-        return dataList.stream().map(this::result2String).collect(Collectors.toList());
+    default List<Map<String, String>> jdbcType2String(List<Map<String, Object>> jdbcResultList) {
+        return jdbcResultList.stream().map(this::jdbcType2String).collect(Collectors.toList());
     }
 
     /**
-     * 结果转为字符串
+     * 将JdbcType集合转为String
      *
-     * @param sourceMap 源集合
+     * @param jdbcResultMap 源集合
      * @return Map<String, String>
      */
-    default Map<String, String> result2String(Map<String, Object> sourceMap) {
-        Iterator<Map.Entry<String, Object>> iterator = sourceMap.entrySet().iterator();
-        if (CollectionUtils.isEmpty(sourceMap))
+    default Map<String, String> jdbcType2String(Map<String, Object> jdbcResultMap) {
+        Iterator<Map.Entry<String, Object>> iterator = jdbcResultMap.entrySet().iterator();
+        if (CollectionUtils.isEmpty(jdbcResultMap))
             return null;
         Map<String, String> resultMap = new HashMap<>();
         while (iterator.hasNext()) {
@@ -71,22 +113,8 @@ public interface Dialect {
             String value = null;
             if (entry.getValue() == null) {
 
-            } else if (entry.getValue() instanceof Clob) {
-                Clob clob = (Clob) entry.getValue();
-                try {
-                    value = IOUtils.getContent(clob.getCharacterStream());
-                } catch (SQLException e) {
-                    throw new DataRouteException(e);
-                }
-            } else if (entry.getValue() instanceof Blob) {
-                Blob blob = (Blob) entry.getValue();
-                try {
-                    value = IOUtils.getContent(new InputStreamReader(blob.getBinaryStream()));
-                } catch (SQLException e) {
-                    throw new DataRouteException(e);
-                }
-            } else if (entry.getValue() instanceof Timestamp) {
-                Timestamp timestamp = (Timestamp) entry.getValue();
+            } else if (entry.getValue() instanceof Date) {
+                Date timestamp = (Date) entry.getValue();
                 value = DateUtils.formatTime(timestamp.getTime(), DateUtils.YMDHMS);
             } else {
                 value = String.valueOf(entry.getValue());
@@ -97,15 +125,4 @@ public interface Dialect {
     }
 
 
-    /**
-     * 获取插入sql
-     */
-    default String getInsertSql(String tableName, String fieldNames) {
-        return new SQL() {{
-            INSERT_INTO(tableName);
-            INTO_COLUMNS(fieldNames);
-        }}.toString();
-    }
-
-    JdbcDriverType getDialectType();
 }

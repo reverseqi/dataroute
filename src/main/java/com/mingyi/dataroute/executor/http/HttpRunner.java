@@ -39,9 +39,9 @@ public class HttpRunner {
         this.setConfig(postRequest);
         try {
             String result = postRequest.execute();
-            logger.info("任务--> {}--{}，服务结果秒回，请注意是否异常!!!!", taskContext.getId(), taskContext.getNodeName());
+            logger.info("【{}--{}】，服务结果秒回，请注意是否异常!!!!", taskContext.getId(), taskContext.getNodeName());
         } catch (SocketTimeoutException e) {
-            logger.info("任务--> {}--{}，强制断开请求", taskContext.getId(), taskContext.getNodeName());
+            logger.info("【{}--{}】，强制断开请求", taskContext.getId(), taskContext.getNodeName());
         }
     }
 
@@ -59,7 +59,7 @@ public class HttpRunner {
         map.keySet().iterator().forEachRemaining(x -> {
             postRequest.putParam(String.valueOf(x), String.valueOf(map.get(x)));
         });
-        logger.info("任务--> {}--{}，请求参数: {}", taskContext.getId(), taskContext.getNodeName(), map);
+        logger.info("【{}--{}】，请求参数: {}", taskContext.getId(), taskContext.getNodeName(), map);
     }
 
     private void setConfig(PostRequest postRequest) {
@@ -74,6 +74,6 @@ public class HttpRunner {
 
         if (map.containsKey("connectionRequestTimeout"))
             configBuilder.setConnectionRequestTimeout(Integer.parseInt(String.valueOf(map.get("connectionRequestTimeout"))));
-        logger.info("任务--> {}--{}，请求配置: {}", taskContext.getId(), taskContext.getNodeName(), map);
+        logger.info("【{}--{}】，请求配置: {}", taskContext.getId(), taskContext.getNodeName(), map);
     }
 }

@@ -6,7 +6,6 @@ package com.mingyi.dataroute.api;
  */
 public class ParamController {
 
-
-
+    
 
 }

@@ -20,7 +20,7 @@ public class JobSqlRunner extends SqlRunner {
     }
 
     public void runBatch(String... sqls) throws SQLException {
-        this.connection.setAutoCommit(false);
+        this.connection.setAutoCommit(true);
         Statement stmt = connection.createStatement();
         for (String sql : sqls) {
             stmt.addBatch(sql);

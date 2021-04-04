@@ -20,6 +20,6 @@ public interface ExtractMapper {
     @Select("select node_id from d_task_extract")
     List<Integer> selectAllTask();
 
-    @Update("update d_task_extract set last_trigger_value = #{triggerValue} where node_id = #{nodeId} and process_id = #{processId}")
+    @Update("update d_task_extract set trigger_field = #{triggerValue} where node_id = #{nodeId} and process_id = #{processId}")
     int updateTriggerValue(Integer processId, Integer nodeId, String triggerValue);
 }

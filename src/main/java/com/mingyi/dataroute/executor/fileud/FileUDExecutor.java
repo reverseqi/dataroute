@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
  */
 public class FileUDExecutor implements Executor {
 
-    private static Logger logger = LoggerFactory.getLogger(FileUDExecutor.class);
+    private static final Logger logger = LoggerFactory.getLogger(FileUDExecutor.class);
 
     private final TaskContext taskContext;
     private final JobContext jobContext;

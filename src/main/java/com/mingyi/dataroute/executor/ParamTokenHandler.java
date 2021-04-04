@@ -18,6 +18,6 @@ public class ParamTokenHandler implements TokenHandler {
     @Override
     public String handleToken(String content) {
         String value = taskContext.getContextDataString(content.replaceAll("(\\$|#|\\{|\\})", ""));
-        return content.contains("#") ? "\\'" +value+"\\'" : value;
+        return content.contains("#") ? "'" +value+"'" : value;
     }
 }

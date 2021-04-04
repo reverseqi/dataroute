@@ -18,4 +18,10 @@ public class ExecutorConstants {
 
     public static final String APPEND = "APPEND";
 
+    public static final String FIELD_STRING = "STRING";
+    public static final String FIELD_DATETIME = "DATETIME";
+    public static final String FIELD_NUMBER = "NUMBER";
+    public static final String FIELD_CONSTANT = "CONSTANT";
+    public static final String FIELD_T_DATETIME = "T_DATETIME";
+    public static final String FIELD_T_NUMBER = "T_NUMBER";
 }

@@ -69,7 +69,7 @@ public class BaseTokenParser {
                     builder.append(src, start, src.length - start);
                     offset = src.length;
                 } else {
-                    builder.append(handler.handleToken(expression.toString()));
+                    builder.append(handler.handleToken(openToken + expression.toString() + closeToken));
                     offset = end + closeToken.length();
                 }
             }

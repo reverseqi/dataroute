@@ -1,7 +1,9 @@
 package com.mingyi.dataroute.db.dialect;
 
-import com.vbrug.fw4j.common.util.StringUtils;
-import org.apache.ibatis.jdbc.SQL;
+import com.vbrug.fw4j.common.util.Assert;
+
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 /**
  * ClickHouse数据库方言
@@ -12,27 +14,29 @@ import org.apache.ibatis.jdbc.SQL;
 public class ClickHouseDialect implements Dialect {
 
     @Override
-    public String getExtractSql(String tableName, String fieldNames, String triggerDateField, String keyField, String defaultCond, Integer bufferSize) {
-        String pageSql = new SQL() {{
-            SELECT(fieldNames);
-            FROM(tableName);
-            WHERE((StringUtils.isEmpty(defaultCond) ? "" : (defaultCond + " and ")) + triggerDateField + " >= toDateTime(?)  and " + triggerDateField + " < toDateTime(?) ");
-            ORDER_BY(triggerDateField + (StringUtils.isEmpty(keyField) ? "" : (", " + keyField)));
-        }}.toString();
-        return pageSql + " LIMIT " + bufferSize;
-    }
-
-    @Override
-    public String getExtractSql(String tableName, String fieldNames, String triggerDateField, String defaultCond) {
-        return new SQL() {{
-            SELECT(fieldNames);
-            FROM(tableName);
-            WHERE((StringUtils.isEmpty(defaultCond) ? "" : (defaultCond + " and ")) + triggerDateField + " >= toDateTime(?) ");
-        }}.toString();
-    }
-
-    @Override
     public JdbcDriverType getDialectType() {
         return JdbcDriverType.CLICKHOUSE;
     }
+
+    @Override
+    public String vfString2Date(String vf) {
+        return "toDateTime('" + vf + "')";
+    }
+
+    @Override
+    public String vfDate2String(String vf) {
+        return "toString(" + vf + ")";
+    }
+
+    @Override
+    public String buildDeleteSQL(String table, String... conditions) {
+        Assert.notNull(conditions, "conditions can not be null !");
+        return new StringBuffer()
+                .append(" ALTER TABLE ")
+                .append(table)
+                .append(" DELETE WHERE ")
+                .append(Arrays.stream(conditions).map(x -> " (" + x + ") ").collect(Collectors.joining(" AND ")))
+                .toString();
+    }
+
 }

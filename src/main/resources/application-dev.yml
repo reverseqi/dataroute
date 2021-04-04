@@ -17,7 +17,7 @@ spring:
     name: dataroute
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://39.98.169.101:3306/lk?characterEncoding=UTF-8
+    url: jdbc:mysql://123.57.211.83:3306/dataroute?characterEncoding=UTF-8
     username: root
     password: oec!Server
     hikari:

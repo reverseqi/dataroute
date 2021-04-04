@@ -61,7 +61,7 @@ public class ExportRunner {
                 for (int i = 1; i <= metaData.getColumnCount(); i++) {
                     map.put(metaData.getColumnName(i).toUpperCase(), rs.getObject(i));
                 }
-                this.write(dataSource.getDialect().result2String(map));
+                this.write(dataSource.getDialect().jdbcType2String(map));
                 count++;
                 if (count % 10000 == 0) {
                     bos.flush();
@@ -77,9 +77,11 @@ public class ExportRunner {
     }
 
     public void write(Map<String, String> map) throws IOException {
-        for (String field : fieldList) {
+        for (int i = 0; i < fieldList.size(); i++) {
+            String field = fieldList.get(i);
             bos.write(map.get(field).getBytes(StandardCharsets.UTF_8));
-            bos.write("\t".getBytes(StandardCharsets.UTF_8));
+            if (i != fieldList.size() - 1)
+                bos.write("\t".getBytes(StandardCharsets.UTF_8));
         }
         bos.write(System.lineSeparator().getBytes(StandardCharsets.UTF_8));
     }

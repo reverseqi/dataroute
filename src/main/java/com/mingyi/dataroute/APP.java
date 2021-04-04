@@ -8,6 +8,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.io.IOException;
 
@@ -16,6 +17,7 @@ import java.io.IOException;
  * @since 1.0
  */
 @SpringBootApplication
+@EnableScheduling
 @ComponentScan(basePackages = {"com.mingyi.dataroute", "com.mingyi.dataroute.api", "com.vbrug.workflow"})
 @MapperScan(basePackages = {"com.mingyi.dataroute.persistence.**.mapper", "com.vbrug.workflow.persistence.**.mapper"})
 public class APP {
