@@ -8,10 +8,7 @@ import com.vbrug.fw4j.common.util.FileUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedOutputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -37,7 +34,7 @@ public class ExportRunner {
 
 
     ExportRunner(ExportPO po, TaskContext taskContext) throws FileNotFoundException {
-        FileUtil.mkdir(po.getFilePath());
+        FileUtil.mkdir(new File(po.getFilePath()));
         bos = new BufferedOutputStream(new FileOutputStream(po.getFilePath()));
         this.po = po;
         this.taskContext = taskContext;

@@ -20,8 +20,8 @@ public class BSqlRunner {
     private static final Logger logger = LoggerFactory.getLogger(BSqlRunner.class);
 
 
-    private final SqlRunner defaultSqlRunner;
-    private final BSqlPO bSqlPO;
+    private final SqlRunner   defaultSqlRunner;
+    private final BSqlPO      bSqlPO;
     private final TaskContext taskContext;
 
     BSqlRunner(TaskContext taskContext, BSqlPO bSqlPO) {
@@ -41,7 +41,7 @@ public class BSqlRunner {
             else
                 sqlRunner = this.defaultSqlRunner;
             sqlRunner.run(SQLParser.parseToken(x.getSql(), new ParamTokenHandler(taskContext)));
-            logger.info("【{}--{}】, 执行SQL-->{} execute in {}", taskContext.getId(), taskContext.getNodeName(), x.getSql(),
+            logger.info("【{}--{}】, 执行SQL-->{} execute in {}", taskContext.getId(), taskContext.getNodeName(), x.getSql().substring(1, 15),
                     x.getDatabaseId() == null ? bSqlPO.getDatasourceId() : x.getDatabaseId());
         }
     }
@@ -49,7 +49,6 @@ public class BSqlRunner {
 
     /**
      * 判断clickhouse 的 UPDATE、DELETE操作是否成功
-     *
      * @param tableName 判断表名称
      */
     // TODO

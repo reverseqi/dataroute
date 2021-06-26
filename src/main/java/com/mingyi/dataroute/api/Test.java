@@ -2,8 +2,10 @@ package com.mingyi.dataroute.api;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
+import com.mingyi.dataroute.persistence.task.bsql.mapper.BSqlMapper;
 import com.vbrug.fw4j.common.util.CollectionUtils;
 import com.vbrug.fw4j.common.util.FileUtil;
+import com.vbrug.fw4j.common.util.JacksonUtils;
 import com.vbrug.fw4j.common.util.StringUtils;
 import com.vbrug.fw4j.core.spring.SpringHelp;
 import org.slf4j.LoggerFactory;
@@ -61,23 +63,25 @@ public class Test {
     }
 
 
-    public static void main3(String[] args) {
-        System.out.println(System.getenv("user.timezone"));
-    }
 
     @RequestMapping("testWF")
     public String testWF() {
-        SpringHelp.getBean(SchedulerController.class).syncData();
         return "success";
     }
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
+            Integer a = Integer.valueOf(1);
+        Integer b = Integer.valueOf(1);
+        System.out.println(a.equals(b));
+    }
+
+    public static void mai(String[] args) throws Exception {
         List<String> lineList = FileUtil.parseFileByLine(new File("/home/vbrug/Downloads/hd_jq/short.txt"));
         BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(new File("/home/vbrug/Downloads/hd_jq/short_clear.txt")));
         String clusterNo = "-1";
         for (String line : lineList) {
             if (line.startsWith("簇")) {
-                List<String> extract = StringUtils.extract(line, "簇.*?:");
+                List<String> extract = StringUtils.extractAll(line, "簇.*?:");
                 if (!CollectionUtils.isEmpty(extract)) {
                     clusterNo = extract.get(0).replaceAll("( |簇|:)", "");
                 }

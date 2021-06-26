@@ -10,6 +10,6 @@ import org.apache.ibatis.annotations.Select;
 
 public interface ImportMapper {
 
-    @Select("select * from d_task_import where process_id = #{processId} and node_id = #{nodeId}")
+    @Select("select * from d_node_import where process_id = #{processId} and node_id = #{nodeId}")
     ImportPO findById(Integer processId, Integer nodeId);
 }

@@ -1,128 +1,106 @@
 package com.mingyi.dataroute.db.dialect;
 
-import com.mingyi.dataroute.db.SQL;
-import com.vbrug.fw4j.common.util.CollectionUtils;
-import com.vbrug.fw4j.common.util.DateUtils;
+import com.mingyi.dataroute.db.Field;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 数据库方言接口
- *
  * @author vbrug
  * @since 1.0.0
  */
 public interface Dialect {
 
+    /**
+     * 获取方言类型
+     * @return 方言枚举类结果
+     */
     JdbcDriverType getDialectType();
 
     /**
-     * 构建查询SQL
+     * 根据内容构建插入SQL
+     * @param tableName 表名
+     * @param fieldList 字段
+     * @param dataList  数据
+     * @param argList 参数集合，若不为空，则使用预编译
+     * @return 插入SQL
      */
-    default String buildQuerySQL(String table, String[] columns, String... conditions) {
-        return buildQuerySQL(table, null, columns, conditions);
-    }
+    String buildInsertSQL(String tableName, List<Field> fieldList, List<Map<String, String>> dataList, List<Object> argList);
 
     /**
      * 构建查询SQL
      */
-    default String buildQuerySQL(String table, String orderColumn, String[] columns, String... conditions) {
-        return new SQL() {{
-            SELECT(columns);
-            FROM(table);
-            WHERE(conditions);
-            ORDER_BY(orderColumn);
-        }}.toString();
-    }
+    String buildQuerySQL(String table, String[] columns, String... conditions);
+
+    /**
+     * 构建查询SQL
+     */
+    String buildQuerySQL(String table, String orderColumn, String[] columns, String... conditions);
 
     /**
      * 构建分页SQL
      */
-    default String buildQueryPageSQL(String table, String orderColumn, String[] columns, int page, int size, String... conditions) {
-        return buildQuerySQL(table, orderColumn, columns, conditions) + " LIMIT " + page + ", " + size;
-    }
+    String buildQueryPageSQL(String table, String orderColumn, String[] columns, int page, int size, String... conditions);
 
     /**
      * 构建Top查询SQL
      */
-    default String buildQueryTopSQL(String table, String orderColumn, String[] columns, int size, String... conditions) {
-        return buildQuerySQL(table, orderColumn, columns, conditions) + " LIMIT " + size;
-    }
+    String buildQueryTopSQL(String table, String orderColumn, String[] columns, int size, String... conditions);
 
     /**
      * 构建删除SQL
      */
-    default String buildDeleteSQL(String table, String... conditions) {
-        return new SQL() {{
-            DELETE_FROM(table);
-            WHERE(conditions);
-        }}.toString();
-    }
+    String buildDeleteSQL(String table, String... conditions);
 
     /**
      * 构建截断SQL
      */
-    default String buildTruncateSQL(String tableName) {
-        return "truncate table " + tableName;
-    }
+    String buildTruncateSQL(String tableName);
 
     /**
      * 构建插入sql
      */
-    default String buildInsertSQL(String table, String... columns) {
-        return new SQL() {{
-            INSERT_INTO(table);
-            INTO_COLUMNS(columns);
-        }}.toString();
-    }
+    String buildInsertSQL(String table, String... columns);
 
     /**
-     * 将值或字段转为数据库日期类型
+     * 函数将值或字段转为数据库日期类型
      */
-    String vfString2Date(String vf);
+    String funcStringToDate(String vf);
 
     /**
-     * 将值或字段数据库日期类型转为字符串
+     * 函数将值或字段数据库日期类型转为字符串
      */
-    String vfDate2String(String vf);
+    String funcDateToString(String vf);
+
+    /**
+     * 最大值函数
+     * @param fieldName 字段名
+     * @param alias     别名
+     * @return 结果
+     */
+    String funcMax(String fieldName, String alias);
+
+    /**
+     * 计数函数
+     * @param alias 别名
+     * @return 结果
+     */
+    String funcCount1(String alias);
 
     /**
      * 将JdbcType集合转为String
-     *
      * @param jdbcResultList 数据源
      * @return List<Map < String, String>>
      */
-    default List<Map<String, String>> jdbcType2String(List<Map<String, Object>> jdbcResultList) {
-        return jdbcResultList.stream().map(this::jdbcType2String).collect(Collectors.toList());
-    }
+    List<Map<String, String>> jdbcType2String(List<Map<String, Object>> jdbcResultList);
 
     /**
      * 将JdbcType集合转为String
-     *
      * @param jdbcResultMap 源集合
      * @return Map<String, String>
      */
-    default Map<String, String> jdbcType2String(Map<String, Object> jdbcResultMap) {
-        Iterator<Map.Entry<String, Object>> iterator = jdbcResultMap.entrySet().iterator();
-        if (CollectionUtils.isEmpty(jdbcResultMap))
-            return null;
-        Map<String, String> resultMap = new HashMap<>();
-        while (iterator.hasNext()) {
-            Map.Entry<String, Object> entry = iterator.next();
-            String value = null;
-            if (entry.getValue() == null) {
-
-            } else if (entry.getValue() instanceof Date) {
-                Date timestamp = (Date) entry.getValue();
-                value = DateUtils.formatTime(timestamp.getTime(), DateUtils.YMDHMS);
-            } else {
-                value = String.valueOf(entry.getValue());
-            }
-            resultMap.put(entry.getKey(), value);
-        }
-        return resultMap;
-    }
+    Map<String, String> jdbcType2String(Map<String, Object> jdbcResultMap);
 
 
 }

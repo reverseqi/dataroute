@@ -11,7 +11,9 @@ import java.util.stream.Collectors;
  * @author vbrug
  * @since 1.0.0
  */
-public class ClickHouseDialect implements Dialect {
+public class ClickHouseDialect extends AbstractDialect {
+
+    private static final String CLICKHOUSE_DATE_FORMAT = "";
 
     @Override
     public JdbcDriverType getDialectType() {
@@ -19,12 +21,12 @@ public class ClickHouseDialect implements Dialect {
     }
 
     @Override
-    public String vfString2Date(String vf) {
+    public String funcStringToDate(String vf) {
         return "toDateTime('" + vf + "')";
     }
 
     @Override
-    public String vfDate2String(String vf) {
+    public String funcDateToString(String vf) {
         return "toString(" + vf + ")";
     }
 

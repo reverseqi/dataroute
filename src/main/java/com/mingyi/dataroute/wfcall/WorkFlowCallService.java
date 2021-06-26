@@ -1,27 +1,25 @@
 package com.mingyi.dataroute.wfcall;
 
-import com.mingyi.dataroute.constant.WFConstants;
 import com.mingyi.dataroute.context.JobContext;
 import com.mingyi.dataroute.context.JobContextBuilder;
 import com.mingyi.dataroute.context.TaskContext;
 import com.mingyi.dataroute.executor.ExecutorFactory;
-import com.vbrug.fw4j.common.util.CollectionUtils;
-import com.vbrug.fw4j.common.util.ObjectUtils;
-import com.vbrug.workflow.WorkFlowEngine;
-import com.vbrug.workflow.bean.NodeBean;
-import com.vbrug.workflow.bean.ResultBean;
+import com.vbrug.fw4j.core.entity.Result;
+import com.vbrug.workflow.core.WorkFlowEngine;
+import com.vbrug.workflow.core.constants.WFConstants;
+import com.vbrug.workflow.core.entity.WFResultCode;
+import com.vbrug.workflow.core.exceptions.WorkFlowException;
+import com.vbrug.workflow.core.persistence.instance.task.entity.TaskDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StopWatch;
 
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
  * 工作流调用
- *
  * @author vbrug
  * @since 1.0.0
  */
@@ -29,76 +27,74 @@ public class WorkFlowCallService {
 
     private static final Logger logger = LoggerFactory.getLogger(WorkFlowCallService.class);
 
-    public static final ConcurrentMap<String, JobContext> processMonitorMap = new ConcurrentHashMap<>();
 
-    public static final ConcurrentMap<String, TaskContext> failTaskMonitorMap = new ConcurrentHashMap<>();
+    public static final ConcurrentMap<Long, JobContext> failJob = new ConcurrentHashMap<>();
+
+    public static final ConcurrentMap<Long, TaskContext> failTaskMonitorMap = new ConcurrentHashMap<>();
+
+    private static final WorkFlowEngine flowEngine = WorkFlowEngine.getInstance();
+
+    public static int FAIL_TEST = 0;
 
 
     /**
      * 流程启动
-     *
      * @param processId 流程ID
      */
     public static void startProcess(Integer processId) {
-        ResultBean<List<NodeBean>> resultBean = WorkFlowEngine.getInstance().startJob(processId);
-        Map<String, Object> result = resultBean.getResult();
-        Integer jobId = ObjectUtils.castInteger(result.get(WFConstants.PARAM_JOB_ID));
+        // 启动流程
+        Long jobId = flowEngine.newJob(processId, null).getData(Long.class);
         // 创建作业环境
-        JobContext jobContext = JobContextBuilder.newJobContext(jobId, String.valueOf(result.get("jobName")), processId).build();
-        processMonitorMap.put(String.valueOf(processId), jobContext);
-
-        // TODO  数据库灵活配置
-        jobContext.getDataMap().put("rootFilePath", "/root/dataroute");
-
-        // 创建当前任务环境
-        NodeBean nodeBean = (NodeBean) result.get("currentNodeBean");
-        TaskContext taskContext = new TaskContext.Builder(nodeBean.getId(), nodeBean.getName(), jobContext, nodeBean.getType()).build();
-        jobContext.putTaskContext(taskContext);
+        JobContext jobContext = JobContextBuilder.newJobContext(jobId, "固定作业", processId).build();
         logger.info("------------ -V- -V- -V- 作业：【{}--{}】 执行开始 -V- -V- -V- ------------", jobId, jobContext.getJobName());
-        execTask(taskContext, resultBean);
+        Result      result      = flowEngine.gTodoTasks(jobId);
+        TaskContext taskContext = new TaskContext.Builder(0L, 0, "开始", jobContext, "START").build();
+        execTask(taskContext, result.getData2List(TaskDTO.class));
     }
 
     /**
      * 获取待执行的任务
      */
     public static void getNextTask(TaskContext taskContext) {
-        ResultBean<List<NodeBean>> resultBean = WorkFlowEngine.getInstance()
-                .getNextTask(taskContext.getJobContext().getJobId(), taskContext.getJobContext().getProcessId(), taskContext.getNodeId());
-        execTask(taskContext, resultBean);
+        flowEngine.completeTask(taskContext.getId(), null);
+        // 获取下一待执行任务
+        Result result1 = flowEngine.gTodoTasks(taskContext.getId(), WFConstants.TASK_PRECONDITION_YES);
+        if (result1.getStatus() == 1) {
+            if (result1.getBCode().equals(WFResultCode.FINISH.getBCode())) {
+                logger.info("------------ -V- -V- -V- 作业：【{}--{}】 结束 -V- -V- -V- ------------", taskContext.getJobContext().getJobId(), taskContext.getJobContext().getJobName());
+                if (failJob.containsKey(taskContext.getJobContext().getJobId())) {
+                    failJob.remove(taskContext.getJobContext().getJobId());
+                }
+            } else if (result1.getBCode().equals(WFResultCode.NO_TODO_TASK.getBCode())) {
+                System.out.println("没有待执行节点");
+            } else {
+                execTask(taskContext, result1.getData2List(TaskDTO.class));
+            }
+        } else {
+            throw new WorkFlowException("流程异常，状态码{} 详细信息 {}", result1.getBCode(), result1.getBMessage());
+        }
     }
 
     /**
      * 执行任务
-     *
-     * @param lastTaskContext 上一任务环境变量
-     * @param resultBean      结果
      */
-    public static void execTask(TaskContext lastTaskContext, ResultBean<List<NodeBean>> resultBean) {
+    public static void execTask(TaskContext lastTaskContext, List<TaskDTO> taskDTOList) {
         JobContext jobContext = lastTaskContext.getJobContext();
-        if (resultBean.getStatus() == WFConstants.STATUS_CODE_5) {
-            processMonitorMap.remove(String.valueOf(jobContext.getProcessId()));
-            logger.info("------------ -V- -V- -V- 作业：【{}-{}】, 完成 -V- -V- -V- ------------", jobContext.getJobId(), jobContext.getJobName());
-            return;
-        }
 
-        Map<String, Object> result = resultBean.getResult();
-        if (CollectionUtils.isEmpty(result) || CollectionUtils.isEmpty(resultBean.getT())) {
-            logger.info("【{}-{}】，无下一待执行任务", lastTaskContext.getId(), lastTaskContext.getNodeName());
-            return;
-        }
-        List<NodeBean> nodeList = resultBean.getT();
-        for (NodeBean nodeBean : nodeList) {
+        for (TaskDTO taskDTO : taskDTOList) {
             new Thread(() -> {
-                TaskContext currentTaskContext = new TaskContext.Builder(nodeBean.getId(), nodeBean.getName(), jobContext, nodeBean.getType()).build();
+                TaskContext currentTaskContext = new TaskContext.Builder(taskDTO.getId(), taskDTO.getNodeId(), taskDTO.getNodeName(), jobContext, taskDTO.getNodeType()).build();
                 logger.info("【{}-{}】，开始执行", currentTaskContext.getId(), currentTaskContext.getNodeName());
                 StopWatch stopWatch = new StopWatch();
                 stopWatch.start();
                 jobContext.putTaskContext(currentTaskContext);
-                nodeBean.getFromNodeList().forEach(x -> currentTaskContext.getLastTaskContextList().add(jobContext.findTaskContext(x)));
                 try {
-                    ExecutorFactory.createExecutor(nodeBean.getType(), currentTaskContext).execute();
+                    if (FAIL_TEST == 0)
+                        ExecutorFactory.createExecutor(taskDTO.getNodeType(), currentTaskContext).execute();
                 } catch (Exception e) {
-                    failTaskMonitorMap.put(currentTaskContext.getId(), currentTaskContext);
+                    flowEngine.recordFailTask(currentTaskContext.getId());
+                    failTaskMonitorMap.put(currentTaskContext.getJobContext().getJobId(), lastTaskContext);
+                    failJob.put(currentTaskContext.getJobContext().getJobId(), currentTaskContext.getJobContext());
                     stopWatch.stop();
                     logger.error("【{}-{}】 任务耗时：{}, 执行失败。{}", currentTaskContext.getId(), currentTaskContext.getNodeName(), stopWatch.getTotalTimeSeconds(), e);
                     return;
@@ -120,16 +116,10 @@ public class WorkFlowCallService {
         }
     }
 
-    public static void execFailTask(TaskContext taskContext) {
-        logger.info("------------ -V- -V- -V- 任务【{}-{}】，开始重跑 -V- -V- -V- ------------", taskContext.getId(), taskContext.getNodeName());
-        try {
-            ExecutorFactory.createExecutor(taskContext.getType(), taskContext).execute();
-        } catch (Exception e) {
-            logger.info("【{}-{}】，重跑失败。", taskContext.getId(), taskContext.getNodeName());
-        }
-        logger.info("------------ -V- -V- -V- 任务【{}-{}】，重跑成功 -V- -V- -V- ------------", taskContext.getId(), taskContext.getNodeName());
-        failTaskMonitorMap.remove(taskContext.getId());
-        WorkFlowCallService.getNextTask(taskContext);
+    public static void execFailTask(Long id) {
+        Result result = flowEngine.redoFailTasks(id);
+        execTask(failTaskMonitorMap.get(id), result.getData2List(TaskDTO.class));
+        failTaskMonitorMap.remove(id);
     }
 
     public static void stopProcess(JobContext jobContext) {
@@ -138,3 +128,4 @@ public class WorkFlowCallService {
     }
 
 }
+

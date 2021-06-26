@@ -8,18 +8,17 @@ import java.util.List;
 
 /**
  * 数据抽取Mapper
- *
  * @author vbrug
  * @since 1.0.0
  */
 public interface ExtractMapper {
 
-    @Select("select * from d_task_extract where node_id = #{nodeId} and process_id = #{processId}")
-    ExtractPO findById(Integer processId, Integer nodeId);
+    @Select("select * from d_node_extract where id = #{nodeId}")
+    ExtractPO findById(Integer nodeId);
 
-    @Select("select node_id from d_task_extract")
+    @Select("select node_id from d_node_extract")
     List<Integer> selectAllTask();
 
-    @Update("update d_task_extract set trigger_field = #{triggerValue} where node_id = #{nodeId} and process_id = #{processId}")
-    int updateTriggerValue(Integer processId, Integer nodeId, String triggerValue);
+    @Update("update d_node_extract set extract_cond_field = #{triggerValue} where id = #{id}")
+    int updateTriggerValue(Integer id, String triggerValue);
 }

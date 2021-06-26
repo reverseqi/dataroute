@@ -18,12 +18,12 @@ public class JobContext {
 
     private static final Logger logger = LoggerFactory.getLogger(JobContext.class);
 
-    private final List<TaskContext> taskContextList = new CopyOnWriteArrayList<>();   // 任务环境集合
-    private final Integer jobId;                                           // 作业ID
-    private final String jobName;                                          // 作业名称
-    private final Integer processId;                                       // 流程ID
-    private Map<String, Object> dataMap = new HashMap<>();                 // 数据Map
-    private final DataSourcePool dsPool = new DataSourcePool();            // 数据Map
+    private final List<TaskContext>   taskContextList = new CopyOnWriteArrayList<>();   // 任务环境集合
+    private final Long                jobId;                                           // 作业ID
+    private final String              jobName;                                          // 作业名称
+    private final Integer             processId;                                       // 流程ID
+    private       Map<String, Object> dataMap         = new HashMap<>();                 // 数据Map
+    private final DataSourcePool      dsPool          = new DataSourcePool();            // 数据Map
 
     private boolean isStop;                                                // 停止状态
 
@@ -35,13 +35,13 @@ public class JobContext {
         isStop = stop;
     }
 
-    protected JobContext(Integer jobId, String jobName, Integer processId) {
+    protected JobContext(Long jobId, String jobName, Integer processId) {
         this.jobId = jobId;
         this.jobName = jobName;
         this.processId = processId;
     }
 
-    public Integer getJobId() {
+    public Long getJobId() {
         return jobId;
     }
 
@@ -69,7 +69,6 @@ public class JobContext {
 
     /**
      * 放入初始化环境变量信息
-     *
      * @param key   键
      * @param value 值
      */
@@ -84,7 +83,6 @@ public class JobContext {
 
     /**
      * 获取Sql执行器
-     *
      * @param dataSourceId 数据源ID
      * @return SqlRunner
      */
@@ -113,7 +111,6 @@ public class JobContext {
 
     /**
      * 获取对象
-     *
      * @param key
      * @return
      */

@@ -47,7 +47,7 @@ public class ImportExecutor implements Executor {
         importPO.setFilePath(ParamParser.parseParam(importPO.getFilePath(), new ParamTokenHandler(taskContext)));
 
         // 03-判断导入处理类型
-        if (importPO.getHandleType().equals(ExecutorConstants.TRUNCATE)) {
+        if (importPO.getHandleType().equals(ExtractConfigure.HANDLE_TYPE_TRUNCATE)) {
             this.truncateMdTable(importPO);
             logger.info("任务--> {}--{}，清空中间表 {}", taskContext.getId(), taskContext.getNodeName(), importPO.getTableName());
         }

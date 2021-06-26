@@ -16,7 +16,6 @@ import java.util.List;
 
 /**
  * 批处理SQL执行器
- *
  * @author vbrug
  * @since 1.0.0
  */
@@ -26,7 +25,7 @@ public class BSqlExecutor implements Executor {
 
 
     private final TaskContext taskContext;
-    private final JobContext jobContext;
+    private final JobContext  jobContext;
 
     public BSqlExecutor(TaskContext taskContext) {
         this.taskContext = taskContext;
@@ -36,7 +35,7 @@ public class BSqlExecutor implements Executor {
     @Override
     public void execute() throws Exception {
         // 01-查询任务实体
-        BSqlPO bSqlPO = SpringHelp.getBean(BSqlService.class).findById(jobContext.getProcessId(), taskContext.getNodeId());
+        BSqlPO bSqlPO = SpringHelp.getBean(BSqlService.class).findById(taskContext.getNodeId());
 
         // 02-环境变量解析
         bSqlPO.setBsqlPath(ParamParser.parseParam(bSqlPO.getBsqlPath(), new ParamTokenHandler(taskContext)));

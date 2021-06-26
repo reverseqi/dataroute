@@ -1,27 +1,28 @@
 package com.mingyi.dataroute.db.dialect;
 
+import com.mingyi.dataroute.db.Field;
 import com.mingyi.dataroute.exceptions.DataRouteException;
 import com.vbrug.fw4j.common.util.CollectionUtils;
 import com.vbrug.fw4j.common.util.DateUtils;
 import com.vbrug.fw4j.common.util.IOUtils;
+import com.vbrug.fw4j.common.util.StringUtils;
 import oracle.sql.TIMESTAMP;
 
 import java.io.InputStreamReader;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.SQLException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Oracle方言
- *
  * @author vbrug
  * @since 1.0.0
  */
-public class OracleDialect implements Dialect {
+public class OracleDialect extends AbstractDialect {
+
+    // 日期格式
+    private static final String ORACLE_DATE_FORMAT = "YYYY-MM-DD HH24:MI:SS";
 
     @Override
     public JdbcDriverType getDialectType() {
@@ -29,13 +30,36 @@ public class OracleDialect implements Dialect {
     }
 
     @Override
-    public String vfString2Date(String vf) {
-        return "TO_DATE('" + vf + "', 'YYYY-MM-DD HH24:MI:SS')";
+    protected void fieldHandle(Field field, String value, StringBuilder sb, List<Object> argList) {
+        if (StringUtils.isEmpty(value)) {
+            if (field.isNullable())
+                sb.append(NULL);
+            else
+                sb.append("''");
+        } else {
+            switch (field.getDataType()) {
+                case DATETIME:
+                    sb.append(this.funcStringToDate(value));
+                    break;
+                case NUMBER:
+                    sb.append(value);
+                    break;
+                case STRING:
+                default:
+                    sb.append("'").append(value.replaceAll("'", "''").replaceAll("\\\\", "\\\\\\\\")).append("'");
+            }
+        }
+        sb.append(",");
     }
 
     @Override
-    public String vfDate2String(String vf) {
-        return "TO_CHAR(" + vf + ", 'YYYY-MM-DD HH24:MI:SS')";
+    public String funcStringToDate(String vf) {
+        return "TO_DATE('" + vf + "', '" + ORACLE_DATE_FORMAT + "')";
+    }
+
+    @Override
+    public String funcDateToString(String vf) {
+        return "TO_CHAR(" + vf + ", '" + ORACLE_DATE_FORMAT + "')";
     }
 
     @Override
@@ -56,7 +80,7 @@ public class OracleDialect implements Dialect {
         Map<String, String> resultMap = new HashMap<>();
         while (iterator.hasNext()) {
             Map.Entry<String, Object> entry = iterator.next();
-            String value = null;
+            String                    value = null;
             if (entry.getValue() instanceof Clob) {
                 Clob clob = (Clob) entry.getValue();
                 try {
@@ -79,7 +103,7 @@ public class OracleDialect implements Dialect {
                 try {
                     value = DateUtils.formatTime(timestamp.dateValue().getTime(), DateUtils.YMDHMS);
                 } catch (SQLException e) {
-                    throw new RuntimeException("日期数据类型转换错误", e);
+                    throw new DataRouteException(StringUtils.replacePlaceholder("Oracle Date: {}, format style {}, occur exception", timestamp, DateUtils.YMDHMS), e);
                 }
             } else if (entry.getValue() != null) {
                 value = String.valueOf(entry.getValue());

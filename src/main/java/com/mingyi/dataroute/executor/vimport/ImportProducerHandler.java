@@ -13,11 +13,9 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * @author vbrug
@@ -45,11 +43,25 @@ public class ImportProducerHandler extends ProducerHandler<List<Map<String, Obje
     @Override
     public List<Map<String, Object>> produce() throws Exception {
         List<Map<String, Object>> list = new ArrayList<>();
-        String line = null;
+        String                    line = null;
         if (importPO.getParseType().equals("JSON")) {
             while ((line = bufferedReader.readLine()) != null) {
                 line = line.replaceAll("'", "\"");
-                List<Map<String, Object>> maps = JacksonUtils.jsonToTileList(line);
+                List<Map<String, String>> tileList = JacksonUtils.json2TileList(line, "/featureList");
+                List<Map<String, Object>> maps = tileList.stream().map(x -> {
+                    Iterator<String>    keyIterator = x.keySet().iterator();
+                    Map<String, Object> newMap      = new HashMap<>();
+                    while (keyIterator.hasNext()) {
+                        String next = keyIterator.next();
+                        if (!"caseNo".equals(next)) {
+                            newMap.put("featureCode", next);
+                            newMap.put("featureValue", x.get(next));
+                        } else {
+                            newMap.put(next, x.get(next));
+                        }
+                    }
+                    return newMap;
+                }).filter( x -> x.containsKey("featureCode")).collect(Collectors.toList());
                 if (!CollectionUtils.isEmpty(maps)) {
                     list.addAll(maps);
                     if (list.size() >= importPO.getBufferSize()) {
@@ -62,8 +74,8 @@ public class ImportProducerHandler extends ProducerHandler<List<Map<String, Obje
             while ((line = bufferedReader.readLine()) != null) {
                 String[] split = line.split("\\s+");
                 if (!Arrays.isNullOrEmpty(split)) {
-                    Map<String, Object> loopMap = new HashMap<>();
-                    String[] splitFields = importPO.getFields().split(",");
+                    Map<String, Object> loopMap     = new HashMap<>();
+                    String[]            splitFields = importPO.getFields().split(",");
                     for (int i = 0; i < splitFields.length && i < split.length; i++) {
                         loopMap.put(StringUtils.lineToHump(splitFields[i].trim()), split[i]);
                     }

@@ -24,7 +24,7 @@ public class HttpRunner {
 
     private final static Logger logger = LoggerFactory.getLogger(HttpRunner.class);
 
-    private final HttpPO httpPO;
+    private final HttpPO      httpPO;
     private final TaskContext taskContext;
 
     HttpRunner(TaskContext taskContext, HttpPO httpPO) {
@@ -47,7 +47,7 @@ public class HttpRunner {
 
     private void setHeader(PostRequest postRequest) {
         if (!StringUtils.hasText(httpPO.getHeader())) return;
-        Map map = JacksonUtils.json2Map(httpPO.getHeader());
+        Map<String, String> map = JacksonUtils.json2Map(httpPO.getHeader(), String.class, String.class);
         map.keySet().iterator().forEachRemaining(x -> {
             postRequest.addHeader(String.valueOf(x), String.valueOf(map.get(x)));
         });
@@ -55,7 +55,7 @@ public class HttpRunner {
 
     private void setParam(PostRequest postRequest) {
         if (!StringUtils.hasText(httpPO.getParams())) return;
-        Map map = JacksonUtils.json2Map(ParamParser.parseParam(httpPO.getParams(), new ParamTokenHandler(taskContext)));
+        Map<String, String> map = JacksonUtils.json2Map(ParamParser.parseParam(httpPO.getParams(), new ParamTokenHandler(taskContext)), String.class, String.class);
         map.keySet().iterator().forEachRemaining(x -> {
             postRequest.putParam(String.valueOf(x), String.valueOf(map.get(x)));
         });
@@ -64,7 +64,7 @@ public class HttpRunner {
 
     private void setConfig(PostRequest postRequest) {
         if (!StringUtils.hasText(httpPO.getConfigure())) return;
-        Map map = JacksonUtils.json2Map(httpPO.getConfigure());
+        Map<String, String>   map           = JacksonUtils.json2Map(httpPO.getConfigure(), String.class, String.class);
         RequestConfig.Builder configBuilder = postRequest.getConfigBuilder();
         if (map.containsKey("socketTimeout"))
             configBuilder.setSocketTimeout(Integer.parseInt(String.valueOf(map.get("socketTimeout"))));

@@ -10,7 +10,6 @@ import java.util.List;
 
 /**
  * 抽取Service
- *
  * @author vbrug
  * @since 1.0.0
  */
@@ -21,8 +20,8 @@ public class ExtractServiceImpl implements ExtractService {
     private ExtractMapper mapper;
 
     @Override
-    public ExtractPO findById(Integer processId, Integer nodeId) {
-        return mapper.findById(processId, nodeId);
+    public ExtractPO findById(Integer nodeId) {
+        return mapper.findById(nodeId);
     }
 
     @Override
@@ -31,7 +30,7 @@ public class ExtractServiceImpl implements ExtractService {
     }
 
     @Override
-    public int updateTriggerValue(Integer processId, Integer nodeId, String triggerValue) {
-        return mapper.updateTriggerValue(processId, nodeId, triggerValue);
+    public int updateTriggerValue(Integer nodeId, String triggerValue) {
+        return mapper.updateTriggerValue(nodeId, triggerValue);
     }
 }

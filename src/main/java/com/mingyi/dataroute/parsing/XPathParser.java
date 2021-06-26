@@ -1,7 +1,5 @@
 package com.mingyi.dataroute.parsing;
 
-import com.mingyi.dataroute.executor.bsql.BSqlBean;
-import com.vbrug.fw4j.common.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -18,9 +16,9 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class XPathParser {
 
@@ -80,6 +78,26 @@ public class XPathParser {
         try {
 
             Document document = dBuilder.parse(uri);
+            parseNode = (Node) xPath
+                    .evaluate(expression, document, XPathConstants.NODE);
+        } catch (Exception e) {
+            throw new XPathParserException(e);
+        }
+
+        XNode xNode = new XNode();
+
+        recursiveParse(xNode, parseNode);
+
+        return xNode;
+
+    }
+
+
+    public static XNode evaluate(InputStream is, String expression) {
+        Node parseNode = null;
+        try {
+
+            Document document = dBuilder.parse(is);
             parseNode = (Node) xPath
                     .evaluate(expression, document, XPathConstants.NODE);
         } catch (Exception e) {

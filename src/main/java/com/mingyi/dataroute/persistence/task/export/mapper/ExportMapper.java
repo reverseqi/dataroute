@@ -9,7 +9,7 @@ import org.apache.ibatis.annotations.Select;
  */
 public interface ExportMapper {
 
-    @Select("select * from d_task_export where node_id = #{nodeId} and process_id = #{processId}")
+    @Select("select * from d_node_export where node_id = #{nodeId} and process_id = #{processId}")
     ExportPO findById(Integer processId, Integer nodeId);
 
 }

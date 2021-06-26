@@ -12,7 +12,7 @@ public interface HttpMapper {
     /**
      * 根据ID查询任务实体
      */
-    @Select("select * from d_task_http where process_id = #{processId} and node_id = #{nodeId}")
+    @Select("select * from d_node_http where process_id = #{processId} and node_id = #{nodeId}")
     HttpPO findById(Integer processId, Integer nodeId);
 
 }

@@ -13,11 +13,10 @@ public interface BSqlService {
 
     /**
      * 查询抽取任务
-     *
      * @param nodeId 节点ID
      * @return 任务实体
      */
-    BSqlPO findById(Integer processId, Integer nodeId);
+    BSqlPO findById(Integer nodeId);
 
     List<Integer> selectAll();
 }

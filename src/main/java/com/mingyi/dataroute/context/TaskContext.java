@@ -12,24 +12,19 @@ import java.util.*;
  */
 public class TaskContext {
 
-    private String id;                                                              // id
-
-    private Integer nodeId;                                                           // 任务ID
-    private String nodeName;                                                         // 任务名称
-    private String type;                                                                // 类型
-    private JobContext jobContext;                                                    // 作业环境
-    private final List<TaskContext> lastTaskContextList = new ArrayList<>();          // 前置任务数据Map
-    private final Map<String, Object> dataMap = new HashMap<>();                      // 数据Map
+    private       Long                id;                                                              // id
+    private       Integer             nodeId;                                                           // 任务ID
+    private       String              nodeName;                                                         // 任务名称
+    private       String              type;                                                                // 类型
+    private       JobContext          jobContext;                                                    // 作业环境
+    private final List<TaskContext>   lastTaskContextList = new ArrayList<>();          // 前置任务数据Map
+    private final Map<String, Object> dataMap             = new HashMap<>();                      // 数据Map
 
     TaskContext() {
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public JobContext getJobContext() {
@@ -69,7 +64,6 @@ public class TaskContext {
 
     /**
      * 放入初始化环境变量信息
-     *
      * @param key   键
      * @param value 值
      */
@@ -93,7 +87,6 @@ public class TaskContext {
 
     /**
      * 获取对象
-     *
      * @param key
      * @return
      */
@@ -117,23 +110,22 @@ public class TaskContext {
 
         private TaskContext taskContext = new TaskContext();
 
-        public Builder(Integer nodeId, String nodeName, JobContext jobContext, String type) {
+        public Builder(Long id, Integer nodeId, String nodeName, JobContext jobContext, String type) {
             taskContext.nodeId = nodeId;
             taskContext.jobContext = jobContext;
             taskContext.nodeName = nodeName;
             taskContext.type = type;
-            taskContext.setId(jobContext.getProcessId() + "-" + jobContext.getJobId() + "-" + nodeId);
+            taskContext.id = id;
         }
 
         public Builder putJsonData(String jsonData) {
-            Map json2Map = JacksonUtils.json2Map(jsonData);
+            Map<String, Object> json2Map = JacksonUtils.json2Map(jsonData, String.class, Object.class);
             CollectionUtils.copy(json2Map, taskContext.dataMap);
             return this;
         }
 
         /**
          * 构建任务环境变量
-         *
          * @return TaskContext
          */
         public TaskContext build() {

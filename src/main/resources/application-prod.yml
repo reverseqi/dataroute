@@ -4,7 +4,7 @@ params:
 # logging settings
 logging:
   config: classpath:config/logback-spring.xml
-  log-dir: /mnt/dataroute/logs
+  log-dir: /var/log/dataroute
 
 # mybatis settings
 mybatis:
@@ -17,7 +17,7 @@ spring:
     name: dataroute
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://192.168.31.27:3306/lk_test?characterEncoding=UTF-8
+    url: jdbc:mysql://53.1.237.87:3306/dataroute_new?characterEncoding=UTF-8
     username: root
     password: oec!Server
     hikari:

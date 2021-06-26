@@ -10,6 +10,11 @@ import com.mingyi.dataroute.context.JobContext;
  */
 public interface Executor {
 
+    /**
+     * 执行任务
+     *
+     * @throws Exception 异常
+     */
     void execute() throws Exception;
 
 }

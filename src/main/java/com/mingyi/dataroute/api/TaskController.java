@@ -1,6 +1,5 @@
 package com.mingyi.dataroute.api;
 
-import com.mingyi.dataroute.context.TaskContext;
 import com.mingyi.dataroute.wfcall.WorkFlowCallService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -20,17 +19,11 @@ public class TaskController {
 
     /**
      * 任务重跑
-     * @param jobId
-     * @param nodeId
-     * @return
      */
     @RequestMapping("redo")
-    public String redo(String id){
-        TaskContext taskContext = WorkFlowCallService.failTaskMonitorMap.get(id);
-        if (taskContext == null)
-            return "task not exists! ";
-        new Thread(() -> WorkFlowCallService.execFailTask(taskContext)).start();
-        return "redo executing task 【"+ id +"】";
+    public String redo(String id) {
+        new Thread(() -> WorkFlowCallService.execFailTask(Long.parseLong(id))).start();
+        return "redo executing job 【" + id + "】";
     }
 
 
