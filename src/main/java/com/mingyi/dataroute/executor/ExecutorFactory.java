@@ -1,14 +1,12 @@
 package com.mingyi.dataroute.executor;
 
-import com.mingyi.dataroute.context.TaskContext;
 import com.mingyi.dataroute.executor.bsql.BSqlExecutor;
 import com.mingyi.dataroute.executor.export.ExportExecutor;
 import com.mingyi.dataroute.executor.extract.ExtractExecutor;
 import com.mingyi.dataroute.executor.fileud.FileUDExecutor;
 import com.mingyi.dataroute.executor.http.HttpExecutor;
 import com.mingyi.dataroute.executor.vimport.ImportExecutor;
-
-import static com.mingyi.dataroute.constant.WFConstants.*;
+import com.vbrug.workflow.core.context.TaskContext;
 
 /**
  * @author vbrug
@@ -16,22 +14,22 @@ import static com.mingyi.dataroute.constant.WFConstants.*;
  */
 public class ExecutorFactory {
 
-    public static Executor createExecutor(String executorType, TaskContext taskContext){
+    public static Executor createExecutor(TaskContext taskContext) {
 
-        switch (executorType){
-            case TASK_EXTRACT :
+        switch (TaskType.getByValue(taskContext.getNodeType())) {
+            case EXTRACT:
                 return new ExtractExecutor(taskContext);
-            case TASK_BSQL :
+            case BSQL:
                 return new BSqlExecutor(taskContext);
-            case TASK_EXPORT :
+            case EXPORT:
                 return new ExportExecutor(taskContext);
-            case TASK_FILE_UD :
+            case FILE_UD:
                 return new FileUDExecutor(taskContext);
-            case TASK_HTTP :
+            case HTTP:
                 return new HttpExecutor(taskContext);
-            case TASK_IMPORT :
+            case IMPORT:
                 return new ImportExecutor(taskContext);
-            default :
+            default:
                 return null;
         }
 

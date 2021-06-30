@@ -1,13 +1,14 @@
 package com.mingyi.dataroute.db;
 
 /**
+ * 属性字段
  * @author vbrug
  * @since 1.0.0
  */
 public class Field {
 
-    private static final String PROPERTY_CONSTANT = "CONSTANT";       // 常量值
-    private static final String PROPERTY_FUNC     = "FUNC";           // 函数
+    public static final String PROPERTY_CONSTANT = "CONSTANT";       // 常量值
+    public static final String PROPERTY_FUNC     = "FUNC";           // 函数
 
     private String  fieldName;
     private String  dataType;

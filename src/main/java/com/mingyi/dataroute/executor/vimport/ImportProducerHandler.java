@@ -1,6 +1,6 @@
 package com.mingyi.dataroute.executor.vimport;
 
-import com.mingyi.dataroute.persistence.task.vimport.po.ImportPO;
+import com.mingyi.dataroute.persistence.node.vimport.po.ImportPO;
 import com.vbrug.fw4j.common.util.CollectionUtils;
 import com.vbrug.fw4j.common.util.IOUtils;
 import com.vbrug.fw4j.common.util.JacksonUtils;

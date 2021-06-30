@@ -10,7 +10,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 数据源工具类
- *
  * @author vbrug
  * @since 1.0.0
  */
@@ -18,9 +17,21 @@ public class DataSourcePool {
 
     private final ConcurrentHashMap<Integer, JobDataSource> dsCache = new ConcurrentHashMap<>();
 
+    private DataSourcePool() {}
+
+    /**
+     * 静态内部类实现单例模式, 内部类在需要时才初始化
+     */
+    private static class DataSourceHolder {
+        private static final DataSourcePool instance = new DataSourcePool();
+    }
+
+    public static DataSourcePool getInstance() {
+        return DataSourceHolder.instance;
+    }
+
     /**
      * 根据Id获取数据源对象
-     *
      * @param dataSourceId 数据源Id
      * @return 数据源连接
      */
@@ -35,12 +46,11 @@ public class DataSourcePool {
 
     /**
      * 创建数据源
-     *
      * @param dataSourceId 数据源ID
      * @return 数据源对象
      */
     private JobDataSource createDataSource(Integer dataSourceId) {
-        DataSourcePO dsPO = SpringHelp.getBean(DataSourceService.class).findById(dataSourceId);
+        DataSourcePO  dsPO          = SpringHelp.getBean(DataSourceService.class).findById(dataSourceId);
         JobDataSource jobDataSource = null;
         if (StringUtils.hasText(dsPO.getUsername()) && StringUtils.hasText(dsPO.getPassword()))
             jobDataSource = new JobDataSource(dsPO.getDriver(), dsPO.getJdbcUrl(), dsPO.getUsername(), dsPO.getPassword());

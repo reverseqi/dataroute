@@ -1,7 +1,5 @@
 package com.mingyi.dataroute.executor;
 
-import com.mingyi.dataroute.context.JobContext;
-
 /**
  * 任务执行接口
  *
@@ -15,6 +13,6 @@ public interface Executor {
      *
      * @throws Exception 异常
      */
-    void execute() throws Exception;
+    ExecuteResult execute() throws Exception;
 
 }

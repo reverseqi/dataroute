@@ -30,26 +30,23 @@ public class OracleDialect extends AbstractDialect {
     }
 
     @Override
-    protected void fieldHandle(Field field, String value, StringBuilder sb, List<Object> argList) {
-        if (StringUtils.isEmpty(value)) {
-            if (field.isNullable())
-                sb.append(NULL);
-            else
-                sb.append("''");
-        } else {
-            switch (field.getDataType()) {
-                case DATETIME:
-                    sb.append(this.funcStringToDate(value));
-                    break;
-                case NUMBER:
-                    sb.append(value);
-                    break;
-                case STRING:
-                default:
-                    sb.append("'").append(value.replaceAll("'", "''").replaceAll("\\\\", "\\\\\\\\")).append("'");
+    public String buildInsertSQL(String tableName, List<? extends Field> fieldList, List<Map<String, String>> dataList, List<Object> argList) {
+        StringBuilder sb = new StringBuilder();
+        // 01-构建基础插入SQL
+        String insertSQL = this.buildInsertSQL(tableName, fieldList.stream().map(Field::getFieldName).toArray(String[]::new));
+        sb.append(insertSQL);
+        sb.append(" VALUES ");
+
+        // 02-处理插入内容
+        for (Map<String, String> map : dataList) {
+            sb.append(" SELECT ");
+            for (Field field : fieldList) {
+                this.fieldHandle(field, map, sb, argList);
             }
+            sb.deleteCharAt(sb.length() - 1);
+            sb.append(" FROM DUAL UNION ALL ");
         }
-        sb.append(",");
+        return sb.substring(0, sb.length() - 10).toString();
     }
 
     @Override

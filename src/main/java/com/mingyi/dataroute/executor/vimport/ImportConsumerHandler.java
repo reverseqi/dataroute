@@ -1,6 +1,6 @@
 package com.mingyi.dataroute.executor.vimport;
 
-import com.mingyi.dataroute.context.TaskContext;
+import com.vbrug.workflow.core.context.TaskContext;
 import com.mingyi.dataroute.db.dialect.JdbcDriverType;
 import com.vbrug.fw4j.common.util.StringUtils;
 import com.vbrug.fw4j.core.design.pc.ConsumerHandler;
@@ -63,9 +63,9 @@ public class ImportConsumerHandler extends ConsumerHandler<List<Map<String, Obje
         try {
             consumerDO.getSqlRunner().runBatch(sqlList.toArray(new String[sqlList.size()]));
             logger.info("任务--> {}--{}，此次导入：{}, 总计导入：{}",
-                    taskContext.getId(), taskContext.getNodeName(), dataList.size(), counter.addAndGet(dataList.size()));
+                    taskContext.getTaskId(), taskContext.getTaskName(), dataList.size(), counter.addAndGet(dataList.size()));
         } catch (SQLException e) {
-            logger.error("任务--> {}--{}，导入发生异常：{}", taskContext.getId(), taskContext.getNodeName(), e);
+            logger.error("任务--> {}--{}，导入发生异常：{}", taskContext.getTaskId(), taskContext.getTaskName(), e);
             throw e;
         }
     }
@@ -92,9 +92,9 @@ public class ImportConsumerHandler extends ConsumerHandler<List<Map<String, Obje
         try {
             consumerDO.getSqlRunner().insert(insertSql, argList.toArray());
             logger.info("任务--> {}--{}，此次导入：{}, 总计导入：{}",
-                    taskContext.getId(), taskContext.getNodeName(), dataList.size(), counter.addAndGet(dataList.size()));
+                    taskContext.getTaskId(), taskContext.getTaskName(), dataList.size(), counter.addAndGet(dataList.size()));
         } catch (SQLException e) {
-            logger.error("任务--> {}--{}，导入发生异常：{}", taskContext.getId(), taskContext.getNodeName(), e);
+            logger.error("任务--> {}--{}，导入发生异常：{}", taskContext.getTaskId(), taskContext.getTaskName(), e);
             throw e;
         }
     }

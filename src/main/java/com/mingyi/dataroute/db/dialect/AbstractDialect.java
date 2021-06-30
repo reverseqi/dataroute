@@ -19,19 +19,28 @@ public abstract class AbstractDialect implements Dialect {
     protected static final String NULL = "NULL";
 
     @Override
-    public String buildInsertSQL(String tableName, List<Field> fieldList, List<Map<String, String>> dataList) {
-        StringBuilder sb        = new StringBuilder();
-        String        insertSQL = this.buildInsertSQL(tableName, fieldList.stream().map(Field::getFieldName).toArray(String[]::new));
+    public String buildInsertSQL(String tableName, List<? extends Field> fieldList, List<Map<String, String>> dataList, List<Object> argList) {
+        StringBuilder sb = new StringBuilder();
+        // 01-构建基础插入SQL
+        String insertSQL = this.buildInsertSQL(tableName, fieldList.stream().map(Field::getFieldName).toArray(String[]::new));
         sb.append(insertSQL);
+        sb.append(" VALUES ");
 
-        return sb.toString();
+        // 02-处理插入内容
+        for (Map<String, String> map : dataList) {
+            sb.append(" (");
+            for (Field field : fieldList) {
+                this.fieldHandle(field, map, sb, argList);
+            }
+            sb.deleteCharAt(sb.length() - 1);
+            sb.append(") ,");
+        }
+
+        return sb.substring(0, sb.length() - 2).toString();
     }
 
-    protected void fieldHandle(Field field, String value, StringBuilder sb) {
-        this.fieldHandle(field, value, sb, null);
-    }
-
-    protected void fieldHandle(Field field, String value, StringBuilder sb, List<Object> argList) {
+    protected void fieldHandle(Field field, Map<String, String> map, StringBuilder sb, List<Object> argList) {
+        String value = map.get(field.getFieldName().trim().toUpperCase());
         if (StringUtils.isEmpty(value)) {
             if (field.isNullable())
                 sb.append(NULL);
@@ -47,9 +56,11 @@ public abstract class AbstractDialect implements Dialect {
                     break;
                 case STRING:
                 default:
-                    argList.add(value);
                     sb.append("?");
-                    sb.append("'").append(value.replaceAll("'", "''").replaceAll("\\\\", "\\\\\\\\")).append("'");
+                    if (argList != null)
+                        argList.add(value);
+                    else
+                        sb.append("'").append(value.replaceAll("'", "''").replaceAll("\\\\", "\\\\\\\\")).append("'");
             }
         }
         sb.append(",");

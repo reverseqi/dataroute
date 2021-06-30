@@ -18,33 +18,31 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class ExtractProducer implements Producer<List<Map<String, String>>> {
     private static final Logger            logger = LoggerFactory.getLogger(ExtractProducer.class);
-    private final        ExtractConfigure  ado;
+    private final        ExtractConfigure  configure;
+    private final        String            extractSql;
     private final        String            startTime;
     private final        String            endTime;
-    private              Connection        connection;
     private              ResultSet         rs;
     private              ResultSetMetaData metaData;
     private final        AtomicLong        counter;
-    private final        Long              extractAmount;
 
-    public ExtractProducer(String startTime, String endTime, ExtractConfigure ado, Connection connection, AtomicLong counter, Long extractAmount) {
-        this.ado = ado;
+    public ExtractProducer(String extractSql, String startTime, String endTime, ExtractConfigure configure, AtomicLong counter) {
+        this.extractSql = extractSql;
+        this.configure = configure;
         this.startTime = startTime;
         this.endTime = endTime;
-        this.connection = connection;
         this.counter = counter;
-        this.extractAmount = extractAmount;
     }
 
     @Override
     public void beforeProduce() throws Exception {
-        connection = ado.getOriginDataSource().getConnection();
-        String            extractSQL = ado.buildExtractSQL().replaceFirst("\\$\\{\\}", startTime).replaceFirst("\\$\\{\\}", endTime);
-        PreparedStatement statement        = connection.prepareStatement(extractSQL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-        statement.setFetchSize(ado.getBufferFetchSize());
+        Connection        connection = configure.getOriginDataSource().getConnection();
+        String            extractSQL = this.extractSql.replaceFirst("\\$\\{\\}", startTime).replaceFirst("\\$\\{\\}", endTime);
+        PreparedStatement statement  = connection.prepareStatement(extractSQL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+        statement.setFetchSize(configure.getBufferFetchSize());
         this.rs = statement.executeQuery();
         this.metaData = rs.getMetaData();
-        logger.info("【{}--{}】，数据抽取SQL--》{}", ado.getTaskContext().getId(), ado.getTaskContext().getNodeName(), StringUtils.removeTNR(extractSQL));
+        logger.info("【{}--{}】，数据抽取SQL--》{}", configure.getTaskContext().getTaskId(), configure.getTaskContext().getTaskName(), StringUtils.removeTNR(extractSQL));
     }
 
     @Override
@@ -56,16 +54,16 @@ public class ExtractProducer implements Producer<List<Map<String, String>>> {
                 map.put(metaData.getColumnName(i).toUpperCase(), rs.getObject(i));
             }
             list.add(map);
-            if (list.size() >= ado.getBufferInsertSize()) {
-                logger.info("【{}--{}】, 已抽取：{}，当前抽取进度：{} ", ado.getTaskContext().getId(), ado.getTaskContext().getNodeName(),
-                        counter.addAndGet(list.size()), NumberUtils.divisionPercent(counter, extractAmount));
-                return ado.getOriginDataSource().getDialect().jdbcType2String(list);
+            if (list.size() >= configure.getBufferInsertSize()) {
+                logger.info("【{}--{}】, 已抽取：{}，当前抽取进度：{} ", configure.getTaskContext().getTaskId(), configure.getTaskContext().getTaskName(),
+                        counter.addAndGet(list.size()), NumberUtils.divisionPercent(counter, configure.getExtractAmount()));
+                return configure.getOriginDataSource().getDialect().jdbcType2String(list);
             }
         }
         if (list.size() > 0) {
-            logger.info("【{}--{}】, 已抽取：{}， 当前抽取进度：{}", ado.getTaskContext().getId(), ado.getTaskContext().getNodeName(),
-                    counter.addAndGet(list.size()), NumberUtils.divisionPercent(counter, extractAmount));
-            return ado.getOriginDataSource().getDialect().jdbcType2String(list);
+            logger.info("【{}--{}】, 已抽取：{}， 当前抽取进度：{}", configure.getTaskContext().getTaskId(), configure.getTaskContext().getTaskName(),
+                    counter.addAndGet(list.size()), NumberUtils.divisionPercent(counter, configure.getExtractAmount()));
+            return configure.getOriginDataSource().getDialect().jdbcType2String(list);
         } else
             return null;
     }
@@ -88,15 +86,13 @@ public class ExtractProducer implements Producer<List<Map<String, String>>> {
         }
         List<Long> splitNumbers = NumberUtils.avgSplitNumber(startLong, endLong, number);
         for (int i = 1; i < splitNumbers.size(); i++) {
-            if (i == splitNumbers.size() - 1)
-                splitProducers.add(new ExtractProducer(DateUtils.formatTime(splitNumbers.get(i - 1), DateUtils.YMDHMS),
-                        DateUtils.formatTime(splitNumbers.get(i), DateUtils.YMDHMS),
-                        this.ado, this.connection, this.counter, this.extractAmount));
-            else
-                splitProducers.add(new ExtractProducer(DateUtils.formatTime(splitNumbers.get(i - 1), DateUtils.YMDHMS),
-                        DateUtils.formatTime(splitNumbers.get(i) - 1000L, DateUtils.YMDHMS),
-                        this.ado, this.connection, this.counter, this.extractAmount));
-
+            String loopExtractSql = this.extractSql;
+            if (i != 1)
+                loopExtractSql = loopExtractSql.replaceFirst(">=", ">");
+            splitProducers.add(new ExtractProducer(loopExtractSql,
+                    DateUtils.formatTime(splitNumbers.get(i - 1), DateUtils.YMDHMS),
+                    DateUtils.formatTime(splitNumbers.get(i), DateUtils.YMDHMS),
+                    this.configure, this.counter));
         }
         return splitProducers.toArray(new ExtractProducer[0]);
     }
@@ -112,6 +108,6 @@ public class ExtractProducer implements Producer<List<Map<String, String>>> {
             e.printStackTrace();
         }
         logger.info("【{}--{}】, ResultSet资源关闭, 生产者{} 抽取结束",
-                ado.getTaskContext().getId(), ado.getTaskContext().getNodeName(), Thread.currentThread().getName());
+                configure.getTaskContext().getTaskId(), configure.getTaskContext().getTaskName(), Thread.currentThread().getName());
     }
 }

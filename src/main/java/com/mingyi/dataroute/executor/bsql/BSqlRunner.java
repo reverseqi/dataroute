@@ -1,9 +1,10 @@
 package com.mingyi.dataroute.executor.bsql;
 
-import com.mingyi.dataroute.context.TaskContext;
+import com.mingyi.dataroute.db.datasource.DataSourcePool;
 import com.mingyi.dataroute.executor.ParamTokenHandler;
 import com.mingyi.dataroute.executor.SQLParser;
-import com.mingyi.dataroute.persistence.task.bsql.po.BSqlPO;
+import com.mingyi.dataroute.persistence.node.bsql.po.BSqlPO;
+import com.vbrug.workflow.core.context.TaskContext;
 import org.apache.ibatis.jdbc.SqlRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,10 +25,10 @@ public class BSqlRunner {
     private final BSqlPO      bSqlPO;
     private final TaskContext taskContext;
 
-    BSqlRunner(TaskContext taskContext, BSqlPO bSqlPO) {
+    BSqlRunner(TaskContext taskContext, BSqlPO bSqlPO) throws SQLException {
         this.taskContext = taskContext;
         this.bSqlPO = bSqlPO;
-        this.defaultSqlRunner = taskContext.getJobContext().getSqlRunner(bSqlPO.getDatasourceId());
+        this.defaultSqlRunner = DataSourcePool.getInstance().getDataSource(bSqlPO.getDatasourceId()).getSqlRunner();
     }
 
     /**
@@ -37,11 +38,11 @@ public class BSqlRunner {
         SqlRunner sqlRunner = null;
         for (BSqlBean x : sqlBeanList) {
             if (x.getDatabaseId() != null)
-                sqlRunner = this.taskContext.getJobContext().getSqlRunner(x.getDatabaseId());
+                sqlRunner = DataSourcePool.getInstance().getDataSource(x.getDatabaseId()).getSqlRunner();
             else
                 sqlRunner = this.defaultSqlRunner;
             sqlRunner.run(SQLParser.parseToken(x.getSql(), new ParamTokenHandler(taskContext)));
-            logger.info("【{}--{}】, 执行SQL-->{} execute in {}", taskContext.getId(), taskContext.getNodeName(), x.getSql().substring(1, 15),
+            logger.info("【{}--{}】, 执行SQL-->{} execute in {}", taskContext.getTaskId(), taskContext.getTaskName(), x.getSql().substring(1, 15),
                     x.getDatabaseId() == null ? bSqlPO.getDatasourceId() : x.getDatabaseId());
         }
     }

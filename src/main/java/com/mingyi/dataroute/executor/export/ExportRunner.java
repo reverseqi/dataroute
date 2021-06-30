@@ -1,10 +1,11 @@
 package com.mingyi.dataroute.executor.export;
 
-import com.mingyi.dataroute.context.TaskContext;
+import com.mingyi.dataroute.db.datasource.DataSourcePool;
 import com.mingyi.dataroute.db.datasource.JobDataSource;
 import com.mingyi.dataroute.executor.ExecutorConstants;
-import com.mingyi.dataroute.persistence.task.export.po.ExportPO;
+import com.mingyi.dataroute.persistence.node.export.po.ExportPO;
 import com.vbrug.fw4j.common.util.FileUtil;
+import com.vbrug.workflow.core.context.TaskContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,9 +29,9 @@ public class ExportRunner {
     private static final Logger logger = LoggerFactory.getLogger(ExportRunner.class);
 
     private final BufferedOutputStream bos;
-    private final ExportPO po;
-    private final TaskContext taskContext;
-    private List<String> fieldList;
+    private final ExportPO             po;
+    private final TaskContext          taskContext;
+    private       List<String>         fieldList;
 
 
     ExportRunner(ExportPO po, TaskContext taskContext) throws FileNotFoundException {
@@ -45,11 +46,11 @@ public class ExportRunner {
         Long count = Long.valueOf(0);
 
         // 初始化
-        JobDataSource dataSource = taskContext.getJobContext().getDsPool().getDataSource(po.getDatasourceId());
+        JobDataSource dataSource = DataSourcePool.getInstance().getDataSource(po.getDatasourceId());
         PreparedStatement statement = dataSource.getConnection()
                 .prepareStatement(po.getSql(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
         statement.setFetchSize(po.getBufferFetchSize());
-        ResultSet rs = statement.executeQuery();
+        ResultSet         rs       = statement.executeQuery();
         ResultSetMetaData metaData = rs.getMetaData();
         this.initFields(metaData);
         try {
@@ -62,7 +63,7 @@ public class ExportRunner {
                 count++;
                 if (count % 10000 == 0) {
                     bos.flush();
-                    logger.info("【{}--{}】已导出数据量：{}", taskContext.getId(), taskContext.getNodeName(), count);
+                    logger.info("【{}--{}】已导出数据量：{}", taskContext.getTaskId(), taskContext.getTaskName(), count);
                 }
             }
         } finally {
@@ -70,7 +71,7 @@ public class ExportRunner {
             bos.close();
         }
         taskContext.getDataMap().put(ExecutorConstants.EXPORT_FILE_PATH, po.getFilePath());
-        logger.info("【{}--{}】，导出完成，总计导出：{}", taskContext.getId(), taskContext.getNodeName(), count);
+        logger.info("【{}--{}】，导出完成，总计导出：{}", taskContext.getTaskId(), taskContext.getTaskName(), count);
     }
 
     public void write(Map<String, String> map) throws IOException {

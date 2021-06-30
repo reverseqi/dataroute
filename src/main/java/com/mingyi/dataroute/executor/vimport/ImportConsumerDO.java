@@ -2,7 +2,7 @@ package com.mingyi.dataroute.executor.vimport;
 
 import com.mingyi.dataroute.db.JobSqlRunner;
 import com.mingyi.dataroute.db.datasource.JobDataSource;
-import com.mingyi.dataroute.persistence.task.vimport.po.ImportPO;
+import com.mingyi.dataroute.persistence.node.vimport.po.ImportPO;
 
 import java.sql.SQLException;
 

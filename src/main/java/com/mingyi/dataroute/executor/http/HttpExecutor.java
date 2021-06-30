@@ -1,14 +1,13 @@
 package com.mingyi.dataroute.executor.http;
 
-import com.mingyi.dataroute.context.JobContext;
-import com.mingyi.dataroute.context.TaskContext;
 import com.mingyi.dataroute.executor.Executor;
 import com.mingyi.dataroute.executor.ParamParser;
 import com.mingyi.dataroute.executor.ParamTokenHandler;
-import com.mingyi.dataroute.persistence.task.http.po.HttpPO;
-import com.mingyi.dataroute.persistence.task.http.service.HttpService;
+import com.mingyi.dataroute.persistence.node.http.po.HttpPO;
+import com.mingyi.dataroute.persistence.node.http.service.HttpService;
 import com.vbrug.fw4j.core.spring.SpringHelp;
 import com.vbrug.fw4j.core.thread.SignalLock;
+import com.vbrug.workflow.core.context.TaskContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +24,7 @@ public class HttpExecutor implements Executor {
     private static Logger logger = LoggerFactory.getLogger(HttpExecutor.class);
 
     private final TaskContext taskContext;
-    private final JobContext jobContext;
+    private final JobContext  jobContext;
     private final SignalLock signalLock = new SignalLock(true);
 
     public HttpExecutor(TaskContext taskContext) {
@@ -43,7 +42,7 @@ public class HttpExecutor implements Executor {
 
         // 03-执行请求
         new HttpRunner(taskContext, httpPO).run();
-        logger.info("【{}--{}】，请求完成, 加锁等待算法回调", taskContext.getId(), taskContext.getNodeName());
+        logger.info("【{}--{}】，请求完成, 加锁等待算法回调", taskContext.getTaskId(), taskContext.getTaskName());
         HttpExecutor.lockMap.put(jobContext.getJobId().toString() + taskContext.getNodeId().toString(), signalLock);
         signalLock.lock();
         try {
@@ -52,7 +51,7 @@ public class HttpExecutor implements Executor {
             signalLock.unlock();
         }
         HttpExecutor.lockMap.remove(jobContext.getJobId().toString() + taskContext.getNodeId().toString());
-        logger.info("【{}--{}】，算法回调成功", taskContext.getId(), taskContext.getNodeName());
+        logger.info("【{}--{}】，算法回调成功", taskContext.getTaskId(), taskContext.getTaskName());
     }
 
 }

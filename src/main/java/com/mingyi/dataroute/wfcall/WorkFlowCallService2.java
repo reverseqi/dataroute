@@ -3,7 +3,7 @@ package com.mingyi.dataroute.wfcall;
 import com.mingyi.dataroute.constant.WFConstants;
 import com.mingyi.dataroute.context.JobContext;
 import com.mingyi.dataroute.context.JobContextBuilder;
-import com.mingyi.dataroute.context.TaskContext;
+import com.vbrug.workflow.core.context.TaskContext;
 import com.mingyi.dataroute.executor.ExecutorFactory;
 import com.vbrug.fw4j.common.util.CollectionUtils;
 import com.vbrug.fw4j.common.util.ObjectUtils;
@@ -87,14 +87,14 @@ public class WorkFlowCallService2 {
 
         Map<String, Object> result = resultBean.getResult();
         if (CollectionUtils.isEmpty(result) || CollectionUtils.isEmpty(resultBean.getT())) {
-            logger.info("【{}-{}】，无下一待执行任务", lastTaskContext.getId(), lastTaskContext.getNodeName());
+            logger.info("【{}-{}】，无下一待执行任务", lasttaskContext.getTaskId(), lasttaskContext.getTaskName());
             return;
         }
         List<NodeBean> nodeList = resultBean.getT();
         for (NodeBean nodeBean : nodeList) {
             new Thread(() -> {
                 TaskContext currentTaskContext = new TaskContext.Builder(nodeBean.getId(), nodeBean.getName(), jobContext, nodeBean.getType()).build();
-                logger.info("【{}-{}】，开始执行", currentTaskContext.getId(), currentTaskContext.getNodeName());
+                logger.info("【{}-{}】，开始执行", currenttaskContext.getTaskId(), currenttaskContext.getTaskName());
                 StopWatch stopWatch = new StopWatch();
                 stopWatch.start();
                 jobContext.putTaskContext(currentTaskContext);
@@ -102,18 +102,18 @@ public class WorkFlowCallService2 {
                 try {
                     ExecutorFactory.createExecutor(nodeBean.getType(), currentTaskContext).execute();
                 } catch (Exception e) {
-                    failTaskMonitorMap.put(currentTaskContext.getId(), currentTaskContext);
+                    failTaskMonitorMap.put(currenttaskContext.getTaskId(), currentTaskContext);
                     stopWatch.stop();
-                    logger.error("【{}-{}】 任务耗时：{}, 执行失败。{}", currentTaskContext.getId(), currentTaskContext.getNodeName(), stopWatch.getTotalTimeSeconds(), e);
+                    logger.error("【{}-{}】 任务耗时：{}, 执行失败。{}", currenttaskContext.getTaskId(), currenttaskContext.getTaskName(), stopWatch.getTotalTimeSeconds(), e);
                     return;
                 }
                 stopWatch.stop();
-                logger.info("【{}-{}】，结束，任务耗时：{}", currentTaskContext.getId(), currentTaskContext.getNodeName(), stopWatch.getTotalTimeSeconds());
+                logger.info("【{}-{}】，结束，任务耗时：{}", currenttaskContext.getTaskId(), currenttaskContext.getTaskName(), stopWatch.getTotalTimeSeconds());
                 if (!jobContext.isStop()) {
                     try {
                         WorkFlowCallService2.getNextTask(currentTaskContext);
                     } catch (Exception e) {
-                        logger.error("【{}-{}】 工作流调用发生异常。{}", currentTaskContext.getId(), currentTaskContext.getNodeName(), stopWatch.getTotalTimeSeconds(), e);
+                        logger.error("【{}-{}】 工作流调用发生异常。{}", currenttaskContext.getTaskId(), currenttaskContext.getTaskName(), stopWatch.getTotalTimeSeconds(), e);
                         return;
                     }
                 } else {
@@ -125,14 +125,14 @@ public class WorkFlowCallService2 {
     }
 
     public static void execFailTask(TaskContext taskContext) {
-        logger.info("------------ -V- -V- -V- 任务【{}-{}】，开始重跑 -V- -V- -V- ------------", taskContext.getId(), taskContext.getNodeName());
+        logger.info("------------ -V- -V- -V- 任务【{}-{}】，开始重跑 -V- -V- -V- ------------", taskContext.getTaskId(), taskContext.getTaskName());
         try {
             ExecutorFactory.createExecutor(taskContext.getType(), taskContext).execute();
         } catch (Exception e) {
-            logger.info("【{}-{}】，重跑失败。", taskContext.getId(), taskContext.getNodeName());
+            logger.info("【{}-{}】，重跑失败。", taskContext.getTaskId(), taskContext.getTaskName());
         }
-        logger.info("------------ -V- -V- -V- 任务【{}-{}】，重跑成功 -V- -V- -V- ------------", taskContext.getId(), taskContext.getNodeName());
-        failTaskMonitorMap.remove(taskContext.getId());
+        logger.info("------------ -V- -V- -V- 任务【{}-{}】，重跑成功 -V- -V- -V- ------------", taskContext.getTaskId(), taskContext.getTaskName());
+        failTaskMonitorMap.remove(taskContext.getTaskId());
         WorkFlowCallService2.getNextTask(taskContext);
     }
 

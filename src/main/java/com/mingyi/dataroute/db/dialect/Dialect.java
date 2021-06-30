@@ -26,7 +26,7 @@ public interface Dialect {
      * @param argList 参数集合，若不为空，则使用预编译
      * @return 插入SQL
      */
-    String buildInsertSQL(String tableName, List<Field> fieldList, List<Map<String, String>> dataList, List<Object> argList);
+    String buildInsertSQL(String tableName, List<? extends Field> fieldList, List<Map<String, String>> dataList, List<Object> argList);
 
     /**
      * 构建查询SQL
