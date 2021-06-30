@@ -27,7 +27,7 @@ public class BSqlExecutor implements Executor {
     }
 
     @Override
-    public ExecuteResult execute() throws Exception {
+    public TaskResult execute() throws Exception {
         // 01-查询任务实体
         BSqlPO bSqlPO = SpringHelp.getBean(BSqlService.class).findById(taskContext.getNodeId());
 

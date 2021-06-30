@@ -2,7 +2,7 @@ package com.mingyi.dataroute.executor.extract;
 
 import com.mingyi.dataroute.executor.Executor;
 import com.mingyi.dataroute.executor.ExecutorConstants;
-import com.mingyi.dataroute.executor.ExecuteResult;
+import com.vbrug.workflow.core.entity.TaskResult;
 import com.mingyi.dataroute.persistence.node.extract.po.ExtractPO;
 import com.mingyi.dataroute.persistence.node.extract.service.ExtractService;
 import com.vbrug.fw4j.common.util.StringUtils;
@@ -28,7 +28,7 @@ public class ExtractExecutor implements Executor {
     }
 
     @Override
-    public ExecuteResult execute() throws Exception {
+    public TaskResult execute() throws Exception {
         // 01-初始化变量
         ExtractService persistenceService = SpringHelp.getBean(ExtractService.class);
         ExtractPO      extractPO          = persistenceService.findById(taskContext.getNodeId());
@@ -38,7 +38,7 @@ public class ExtractExecutor implements Executor {
         if (!extractRunner.hasNewData()) {
             logger.info("【{}--{}】，当前无新数据，数据抽取结束", taskContext.getTaskId(), taskContext.getTaskName());
             // 无数据，另行处理
-            return ExecuteResult.newInstance().setPrecondition(WFConstants.TASK_PRECONDITION_TWO);
+            return TaskResult.newInstance().setPrecondition(WFConstants.TASK_PRECONDITION_TWO);
         }
 
         // 03-判断是否需要清空中间表
@@ -51,7 +51,7 @@ public class ExtractExecutor implements Executor {
 
         // 05-更新触发日期
         extractRunner.updateTrigger();
-        return ExecuteResult.newInstance().setPrecondition(WFConstants.TASK_PRECONDITION_YES)
+        return TaskResult.newInstance().setPrecondition(WFConstants.TASK_PRECONDITION_YES)
                 .setRemark(StringUtils.replacePlaceholder("此次共抽取{}", extractAmount));
     }
 

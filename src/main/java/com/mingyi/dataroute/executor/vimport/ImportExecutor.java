@@ -33,7 +33,7 @@ public class ImportExecutor implements Executor {
     }
 
     @Override
-    public ExecuteResult execute() throws Exception {
+    public TaskResult execute() throws Exception {
         // 01-查询任务实体
         ImportPO importPO = SpringHelp.getBean(ImportService.class).findById(taskContext.getNodeId());
 

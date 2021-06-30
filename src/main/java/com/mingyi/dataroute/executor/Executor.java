@@ -13,6 +13,6 @@ public interface Executor {
      *
      * @throws Exception 异常
      */
-    ExecuteResult execute() throws Exception;
+    TaskResult execute() throws Exception;
 
 }
