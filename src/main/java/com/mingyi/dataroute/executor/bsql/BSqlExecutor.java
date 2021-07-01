@@ -1,10 +1,14 @@
 package com.mingyi.dataroute.executor.bsql;
 
-import com.mingyi.dataroute.executor.*;
-import com.mingyi.dataroute.persistence.node.bsql.po.BSqlPO;
+import com.mingyi.dataroute.executor.Executor;
+import com.mingyi.dataroute.executor.ParamParser;
+import com.mingyi.dataroute.executor.ParamTokenHandler;
+import com.mingyi.dataroute.executor.SQLParser;
+import com.mingyi.dataroute.persistence.node.bsql.entity.BSqlPO;
 import com.mingyi.dataroute.persistence.node.bsql.service.BSqlService;
 import com.vbrug.fw4j.core.spring.SpringHelp;
 import com.vbrug.workflow.core.context.TaskContext;
+import com.vbrug.workflow.core.entity.TaskResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +32,7 @@ public class BSqlExecutor implements Executor {
 
     @Override
     public TaskResult execute() throws Exception {
+        TaskResult taskResult = TaskResult.newInstance(taskContext.getTaskId());
         // 01-查询任务实体
         BSqlPO bSqlPO = SpringHelp.getBean(BSqlService.class).findById(taskContext.getNodeId());
 
@@ -42,6 +47,6 @@ public class BSqlExecutor implements Executor {
         logger.info("【{}--{}】, 开始执行sql脚本", taskContext.getTaskId(), taskContext.getTaskName());
         new BSqlRunner(taskContext, bSqlPO).run(bSqlBeans);
 
-        return null;
+        return taskResult.setPrecondition(TaskResult.PRECONDITION_YES).setRemark("");
     }
 }

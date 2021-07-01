@@ -6,30 +6,19 @@ package com.mingyi.dataroute.persistence.node.http.po;
  */
 public class HttpPO {
 
-    private Integer processId;                         // 流程ID
-    private Integer nodeId;                            // 节点ID
-    private String url;                                // 请求路径
-    private String params;                             // 请求参数
-    private String configure;                          // 配置参数
-    private String header;                             // 请求头
-    private Integer retryInterval;                     // 重试间隔（分）
-    private Integer maxRetryTimes;                     // 最大重试次数
-    private String remark;                             // 日志
+    private Integer id;                            // 节点ID
+    private String  url;                                // 请求路径
+    private String  params;                             // 请求参数
+    private String  configure;                          // 配置参数
+    private String  header;                             // 请求头
+    private String  remark;                             // 日志
 
-    public Integer getProcessId() {
-        return processId;
+    public Integer getId() {
+        return id;
     }
 
-    public void setProcessId(Integer processId) {
-        this.processId = processId;
-    }
-
-    public Integer getNodeId() {
-        return nodeId;
-    }
-
-    public void setNodeId(Integer nodeId) {
-        this.nodeId = nodeId;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getUrl() {
@@ -62,22 +51,6 @@ public class HttpPO {
 
     public void setHeader(String header) {
         this.header = header;
-    }
-
-    public Integer getRetryInterval() {
-        return retryInterval;
-    }
-
-    public void setRetryInterval(Integer retryInterval) {
-        this.retryInterval = retryInterval;
-    }
-
-    public Integer getMaxRetryTimes() {
-        return maxRetryTimes;
-    }
-
-    public void setMaxRetryTimes(Integer maxRetryTimes) {
-        this.maxRetryTimes = maxRetryTimes;
     }
 
     public String getRemark() {

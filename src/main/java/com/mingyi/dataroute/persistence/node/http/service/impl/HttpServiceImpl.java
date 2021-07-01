@@ -9,7 +9,6 @@ import javax.annotation.Resource;
 
 /**
  * http service 实现类
- *
  * @author vbrug
  * @since 1.0.0
  */
@@ -20,7 +19,7 @@ public class HttpServiceImpl implements HttpService {
     private HttpMapper mapper;
 
     @Override
-    public HttpPO findById(Integer processId, Integer nodeId) {
-        return mapper.findById(processId, nodeId);
+    public HttpPO findById(Integer nodeId) {
+        return mapper.findById(nodeId);
     }
 }

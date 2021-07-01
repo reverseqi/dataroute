@@ -10,10 +10,9 @@ public interface HttpService {
 
     /**
      * 根据主键查询
-     * @param processId 流程ID
      * @param nodeId 节点ID
      * @return 任务实体
      */
-    HttpPO findById(Integer processId, Integer nodeId);
+    HttpPO findById(Integer nodeId);
 
 }

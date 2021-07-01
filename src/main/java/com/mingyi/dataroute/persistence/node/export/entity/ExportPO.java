@@ -1,4 +1,4 @@
-package com.mingyi.dataroute.persistence.node.export.po;
+package com.mingyi.dataroute.persistence.node.export.entity;
 
 /**
  * @author vbrug
@@ -6,32 +6,22 @@ package com.mingyi.dataroute.persistence.node.export.po;
  */
 public class ExportPO {
 
-    private Integer processId;                         // 流程ID
-    private Integer nodeId;                            // 节点ID
+    private Integer id;                                // 节点ID
     private Integer datasourceId;                      // 数据源ID
-    private String sql;                                // 导出SQL
-    private String filePath;                           // 导出文件路径
+    private String  sql;                               // 导出SQL
+    private String  filePath;                          // 导出文件路径
     private Integer bufferFetchSize;                   // 每次获取数量
-    private Integer retryInterval;                     // 重试间隔（分）
-    private Integer maxRetryTimes;                     // 最大重试次数
     private Integer producerNumber;                    // 线程数量
     private Integer consumerNumber;                    // 消费者数量
+    private String  resultParamName;                   // 结果参数名
+    private String  remark;                            // 备注
 
-
-    public Integer getProcessId() {
-        return processId;
+    public Integer getId() {
+        return id;
     }
 
-    public void setProcessId(Integer processId) {
-        this.processId = processId;
-    }
-
-    public Integer getNodeId() {
-        return nodeId;
-    }
-
-    public void setNodeId(Integer nodeId) {
-        this.nodeId = nodeId;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public Integer getDatasourceId() {
@@ -66,22 +56,6 @@ public class ExportPO {
         this.bufferFetchSize = bufferFetchSize;
     }
 
-    public Integer getRetryInterval() {
-        return retryInterval;
-    }
-
-    public void setRetryInterval(Integer retryInterval) {
-        this.retryInterval = retryInterval;
-    }
-
-    public Integer getMaxRetryTimes() {
-        return maxRetryTimes;
-    }
-
-    public void setMaxRetryTimes(Integer maxRetryTimes) {
-        this.maxRetryTimes = maxRetryTimes;
-    }
-
     public Integer getProducerNumber() {
         return producerNumber;
     }
@@ -96,5 +70,21 @@ public class ExportPO {
 
     public void setConsumerNumber(Integer consumerNumber) {
         this.consumerNumber = consumerNumber;
+    }
+
+    public String getResultParamName() {
+        return resultParamName;
+    }
+
+    public void setResultParamName(String resultParamName) {
+        this.resultParamName = resultParamName;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
     }
 }

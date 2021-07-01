@@ -19,7 +19,7 @@ public class FileUDServiceImpl implements FileUDService {
 
 
     @Override
-    public FileUDPO findById(Integer processId, Integer nodeId) {
-        return mapper.findById(processId, nodeId);
+    public FileUDPO findById(Integer nodeId) {
+        return mapper.findById(nodeId);
     }
 }

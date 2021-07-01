@@ -10,6 +10,6 @@ import org.apache.ibatis.annotations.Select;
 
 public interface ImportMapper {
 
-    @Select("select * from d_node_import where node_id = #{0}")
+    @Select("select * from d_node_import where id = #{0}")
     ImportPO findById(Integer nodeId);
 }

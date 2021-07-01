@@ -15,8 +15,6 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 算法接口服务
- *
  * @author vbrug
  * @since 1.0.0
  */
@@ -87,5 +85,4 @@ public class AlgController {
         System.out.println(execute);
         return execute;
     }
-
 }

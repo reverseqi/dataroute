@@ -20,12 +20,11 @@ public class ExtractPO implements Serializable {
     private String  extractBatchField;                  // 抽取批次字段
     private String  extractCondField;                   // 抽取条件字段
     private String  defaultCond;                        // 默认查询条件
-    private String  handleType;                         // 处理类型（TRUNCATE, APPEND）
+    private String  sinkDbType;                         // 处理类型（TRUNCATE, APPEND）
     private String  params;                             // JSON格式，可支持参数buffer_fetch_size--每次取出数量 buffer_insert_size--每次插入数量
     private Integer producerNumber;                    // 生产者数量
     private Integer consumerNumber;                    // 消费者数量
-    private Integer retryInterval;                     // 重试间隔（分）
-    private Integer maxRetryTimes;                     // 最大重试次数
+    private String  remark;                            // 备注
 
     public Integer getId() {
         return id;
@@ -99,12 +98,12 @@ public class ExtractPO implements Serializable {
         this.defaultCond = defaultCond;
     }
 
-    public String getHandleType() {
-        return handleType;
+    public String getSinkDbType() {
+        return sinkDbType;
     }
 
-    public void setHandleType(String handleType) {
-        this.handleType = handleType;
+    public void setSinkDbType(String sinkDbType) {
+        this.sinkDbType = sinkDbType;
     }
 
     public String getParams() {
@@ -131,19 +130,11 @@ public class ExtractPO implements Serializable {
         this.consumerNumber = consumerNumber;
     }
 
-    public Integer getRetryInterval() {
-        return retryInterval;
+    public String getRemark() {
+        return remark;
     }
 
-    public void setRetryInterval(Integer retryInterval) {
-        this.retryInterval = retryInterval;
-    }
-
-    public Integer getMaxRetryTimes() {
-        return maxRetryTimes;
-    }
-
-    public void setMaxRetryTimes(Integer maxRetryTimes) {
-        this.maxRetryTimes = maxRetryTimes;
+    public void setRemark(String remark) {
+        this.remark = remark;
     }
 }

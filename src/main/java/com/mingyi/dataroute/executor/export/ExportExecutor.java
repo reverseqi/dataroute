@@ -3,10 +3,12 @@ package com.mingyi.dataroute.executor.export;
 import com.mingyi.dataroute.executor.Executor;
 import com.mingyi.dataroute.executor.ParamParser;
 import com.mingyi.dataroute.executor.ParamTokenHandler;
-import com.mingyi.dataroute.persistence.node.export.po.ExportPO;
+import com.mingyi.dataroute.persistence.node.export.entity.ExportPO;
 import com.mingyi.dataroute.persistence.node.export.service.ExportService;
+import com.vbrug.fw4j.common.util.StringUtils;
 import com.vbrug.fw4j.core.spring.SpringHelp;
 import com.vbrug.workflow.core.context.TaskContext;
+import com.vbrug.workflow.core.entity.TaskResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +27,8 @@ public class ExportExecutor implements Executor {
     }
 
     @Override
-    public void execute() throws Exception {
+    public TaskResult execute() throws Exception {
+        TaskResult taskResult = TaskResult.newInstance(taskContext.getTaskId());
         // 01-查询任务详情
         ExportPO exportPO = SpringHelp.getBean(ExportService.class).findById(taskContext.getNodeId());
 
@@ -33,7 +36,9 @@ public class ExportExecutor implements Executor {
         exportPO.setFilePath(ParamParser.parseParam(exportPO.getFilePath(), new ParamTokenHandler(taskContext)));
 
         // 03-导出数据
-        new ExportRunner(exportPO, taskContext).run();
+        Long counter = new ExportRunner(exportPO, taskContext).run(taskResult);
+
+        return taskResult.setPrecondition(TaskResult.PRECONDITION_YES).setRemark(StringUtils.replacePlaceholder("此次共导出{}条记录", counter));
     }
 
 

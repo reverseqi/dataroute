@@ -25,11 +25,6 @@ public class ExtractServiceImpl implements ExtractService {
     }
 
     @Override
-    public List<Integer> selectAllTask() {
-        return mapper.selectAllTask();
-    }
-
-    @Override
     public int updateTriggerValue(Integer nodeId, String triggerValue) {
         return mapper.updateTriggerValue(nodeId, triggerValue);
     }

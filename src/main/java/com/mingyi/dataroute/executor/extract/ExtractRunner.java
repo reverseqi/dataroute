@@ -86,7 +86,17 @@ public class ExtractRunner {
      * 更新触发条件
      */
     public void updateTrigger() throws SQLException {
-        String condFieldJSON = JacksonUtils.bean2Json(configure.getCondField());
+        ExtractField condField = configure.getCondField();
+        switch (condField.getProperty().toUpperCase()) {
+            case ExtractConfigure.FIELD_PROPERTY_RANGE:
+                return;
+            case ExtractConfigure.FIELD_PROPERTY_MINIMUM_EXCLUDE:
+            case ExtractConfigure.FIELD_PROPERTY_MINIMUM_INCLUDE:
+            default:
+                condField.setMinValue(condField.getMaxValue());
+                condField.setMaxValue(null);
+        }
+        String condFieldJSON = JacksonUtils.bean2Json(condField);
         SpringHelp.getBean(ExtractService.class).updateTriggerValue(taskContext.getNodeId(), condFieldJSON);
         logger.info("【{}--{}】，更新同步条件{}。", taskContext.getTaskId(), taskContext.getTaskName(), condFieldJSON);
     }

@@ -2,8 +2,6 @@ package com.mingyi.dataroute.persistence.node.extract.service;
 
 import com.mingyi.dataroute.persistence.node.extract.po.ExtractPO;
 
-import java.util.List;
-
 /**
  * 数据抽取
  * @author vbrug
@@ -19,11 +17,9 @@ public interface ExtractService {
     ExtractPO findById(Integer nodeId);
 
     /**
-     * 查询所有节点信息
-     * @return
+     * 更新触发条件
+     * @return 结果
      */
-    List<Integer> selectAllTask();
-
     int updateTriggerValue(Integer nodeId, String triggerValue);
 
 

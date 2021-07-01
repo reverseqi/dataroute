@@ -3,7 +3,7 @@ package com.mingyi.dataroute.executor.bsql;
 import com.mingyi.dataroute.db.datasource.DataSourcePool;
 import com.mingyi.dataroute.executor.ParamTokenHandler;
 import com.mingyi.dataroute.executor.SQLParser;
-import com.mingyi.dataroute.persistence.node.bsql.po.BSqlPO;
+import com.mingyi.dataroute.persistence.node.bsql.entity.BSqlPO;
 import com.vbrug.workflow.core.context.TaskContext;
 import org.apache.ibatis.jdbc.SqlRunner;
 import org.slf4j.Logger;

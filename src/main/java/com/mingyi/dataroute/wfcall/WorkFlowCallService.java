@@ -1,11 +1,13 @@
 package com.mingyi.dataroute.wfcall;
 
+import com.mingyi.dataroute.exceptions.DataRouteException;
 import com.mingyi.dataroute.executor.ExecutorFactory;
+import com.vbrug.fw4j.common.util.StringUtils;
 import com.vbrug.fw4j.core.entity.Result;
 import com.vbrug.workflow.core.WorkFlowEngine;
-import com.vbrug.workflow.core.constants.WFConstants;
 import com.vbrug.workflow.core.context.JobContext;
 import com.vbrug.workflow.core.context.TaskContext;
+import com.vbrug.workflow.core.entity.TaskResult;
 import com.vbrug.workflow.core.entity.WFResultCode;
 import com.vbrug.workflow.core.exceptions.WorkFlowException;
 import com.vbrug.workflow.core.persistence.instance.task.entity.TaskDTO;
@@ -14,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.StopWatch;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 工作流调用
@@ -28,43 +31,79 @@ public class WorkFlowCallService {
 
     public static int FAIL_TEST = 0;
 
-
     /**
-     * 流程启动
+     * 新建作业
      * @param processId 流程ID
+     * @return 作业ID
      */
-    public static void startProcess(Integer processId) {
-        // 启动流程
+    public static Long newJob(Integer processId) {
         JobContext jobContext = flowEngine.newJob(processId, null).getData(JobContext.class);
-        // 创建作业环境
-        logger.info("------------ -V- -V- -V- 作业：【{}--{}】 执行开始 -V- -V- -V- ------------", jobContext.getJobId(), jobContext.getJobName());
-        Result result = flowEngine.gTodoTasks(jobContext.getJobId());
-        execTask(taskContext, result.getData2List(TaskDTO.class));
+        return jobContext.getJobId();
     }
 
     /**
-     * 获取待执行的任务
+     * 执行作业
+     * @param jobId 作业ID
      */
-    public static void getNextTask(TaskContext taskContext) {
-        // 获取下一待执行任务
-        Result result1 = flowEngine.gTodoTasks(taskContext.getTaskId(), WFConstants.TASK_PRECONDITION_YES);
-        if (result1.getStatus() == 1) {
-            if (result1.getBCode().equals(WFResultCode.FINISH.getBCode())) {
-                logger.info("------------ -V- -V- -V- 作业：【{}--{}】 结束 -V- -V- -V- ------------", taskContext.getJobContext().getJobId(), taskContext.getJobContext().getJobName());
-            } else if (result1.getBCode().equals(WFResultCode.NO_TODO_TASK.getBCode())) {
-                logger.info("当前任务{}-{}，没有后续执行节点", );
-            } else {
-                execTask(taskContext, result1.getData2List(TaskDTO.class));
+    public static void doJob(Long jobId) {
+        JobContext jobContext = flowEngine.gJobContext(jobId).getData(JobContext.class);
+        logger.info(">>>>>>>>>>>>>>>>>>>> 作业：{}--{} 执行开始 <<<<<<<<<<<<<<<<<<<<", jobContext.getJobId(), jobContext.getJobName());
+        Result result = flowEngine.gTodoTasks(jobContext.getJobId());
+        if (assertJobFinish(result, jobContext))
+            return;
+        if (result.getBCode().equals(WFResultCode.NO_TODO_TASK.getBCode())) {
+            throw new DataRouteException(StringUtils.replacePlaceholder("当前作业 {} 无可执行任务", jobContext.getJobId()));
+        }
+        _execTask(jobContext, result.getData2List(TaskDTO.class));
+    }
+
+    /**
+     * 重跑作业失败的任务
+     * @param jobId 作业ID
+     */
+    public static void redoFailJob(Long jobId) {
+        JobContext jobContext = flowEngine.gJobContext(jobId).getData(JobContext.class);
+        logger.info(">>>>>>>>>>>>>>>>>>>> 作业：{}--{} 重跑失败任务 <<<<<<<<<<<<<<<<<<<<", jobContext.getJobId(), jobContext.getJobName());
+        Result result = flowEngine.redoFailTasks(jobContext.getJobId());
+        if (assertJobFinish(result, jobContext))
+            return;
+        if (result.getBCode().equals(WFResultCode.NO_TODO_TASK.getBCode())) {
+            logger.info("当前作业 {} 无失败任务", jobContext.getJobId());
+            return;
+        }
+        _execTask(jobContext, result.getData2List(TaskDTO.class));
+    }
+
+    /**
+     * 停止作业
+     * @param jobId 作业ID
+     */
+    public static void stopJob(Long jobId) {
+        JobContext jobContext = flowEngine.gJobContext(jobId).getData(JobContext.class);
+        logger.info(">>>>>>>>>>>>>>>>>>>> 作业：{}--{} 强制停止, 执行中任务仍继续执行 <<<<<<<<<<<<<<<<<<<<", jobContext.getJobId(), jobContext.getJobName());
+    }
+
+    /**
+     * 判断执行结果, 1-成功，0-异常
+     * @param result 结果对象
+     * @return false-未完成, true-作业完成
+     */
+    private static boolean assertJobFinish(Result result, JobContext jobContext) {
+        if (result.getStatus() == 1) {
+            if (result.getBCode().equals(WFResultCode.FINISH.getBCode())) {
+                logger.info(">>>>>>>>>>>>>>>>>>>> 作业：{}--{} 执行完成 <<<<<<<<<<<<<<<<<<<<", jobContext.getJobId(), jobContext.getJobName());
+                return true;
             }
+            return false;
         } else {
-            throw new WorkFlowException("流程异常，状态码{} 详细信息 {}", result1.getBCode(), result1.getBMessage());
+            throw new WorkFlowException("流程异常，状态码{} 详细信息 {}", result.getBCode(), result.getBMessage());
         }
     }
 
     /**
      * 执行任务
      */
-    public static void execTask(JobContext jobContext, List<TaskDTO> taskDTOList) {
+    private static void _execTask(JobContext jobContext, List<TaskDTO> taskDTOList) {
         for (TaskDTO taskDTO : taskDTOList) {
             TaskContext taskContext = jobContext.getTaskContext(taskDTO.getId());
             new Thread(() -> {
@@ -72,42 +111,33 @@ public class WorkFlowCallService {
                 StopWatch taskElapsedTimeWatch = new StopWatch();
                 taskElapsedTimeWatch.start();
                 try {
-                    if (FAIL_TEST == 0)
-                        ExecutorFactory.createExecutor(taskContext).execute();
-                    flowEngine.completeTask(taskContext.getTaskId(), null);
-                } catch (Exception e) {
-                    flowEngine.recordFailTask(taskContext.getTaskId(), e.getMessage());
-                    taskElapsedTimeWatch.stop();
-                    logger.error("【{}-{}】 任务耗时：{}, 执行失败。{}", taskContext.getTaskId(), taskContext.getTaskName(), taskElapsedTimeWatch.getTotalTimeSeconds(), e);
-                    return;
-                }
-                taskElapsedTimeWatch.stop();
-                logger.info("【{}-{}】，结束，任务耗时：{}", taskContext.getTaskId(), taskContext.getTaskName(), taskElapsedTimeWatch.getTotalTimeSeconds());
-                if (!jobContext.isStop()) {
-                    try {
-                        WorkFlowCallService.getNextTask(currentTaskContext);
-                    } catch (Exception e) {
-                        logger.error("【{}-{}】 工作流调用发生异常。{}", taskContext.getTaskId(), taskContext.getTaskName(), taskElapsedTimeWatch.getTotalTimeSeconds(), e);
+                    // 执行任务
+                    TaskResult taskResult = null;
+                    if (FAIL_TEST == 0) {
+                        taskResult = Objects.requireNonNull(ExecutorFactory.createExecutor(taskContext)).execute();
+                    }
+                    flowEngine.completeTask(taskResult);
+                    // 判断任务结果
+                    Result result = flowEngine.gTodoTasks(taskContext.getTaskId(), TaskResult.PRECONDITION_YES);
+                    if (assertJobFinish(result, jobContext))
+                        return;
+                    if (result.getBCode().equals(WFResultCode.NO_TODO_TASK.getBCode())) {
+                        logger.info("当前{} ->> {} 无后续待执行任务", taskContext.getJobContext().getJobId(), taskContext.getTaskId());
                         return;
                     }
-                } else {
-                    logger.info("------------ -V- -V- -V- 作业【{}-{}】停止，不再执行后续任务 -V- -V- -V- ------------", jobContext.getJobId(), jobContext.getJobName());
+                    _execTask(jobContext, result.getData2List(TaskDTO.class));
+                } catch (Exception e) {
+                    flowEngine.recordFailTask(TaskResult.newInstance(taskContext.getTaskId()).setRemark("异常信息：" + e.getMessage()));
+                    logger.error("【{}-{}】 任务耗时：{}, 执行失败。{}", taskContext.getTaskId(), taskContext.getTaskName(), taskElapsedTimeWatch.getTotalTimeSeconds(), e);
+                    return;
+                } finally {
+                    taskElapsedTimeWatch.stop();
                 }
+                logger.info("【{}-{}】，结束，任务耗时：{}", taskContext.getTaskId(), taskContext.getTaskName(), taskElapsedTimeWatch.getTotalTimeSeconds());
+                logger.info("------------ -V- -V- -V- 作业【{}-{}】停止，不再执行后续任务 -V- -V- -V- ------------", jobContext.getJobId(), jobContext.getJobName());
 
             }).start();
         }
     }
-
-    public static void execFailTask(Long id) {
-        Result result = flowEngine.redoFailTasks(id);
-        execTask(failTaskMonitorMap.get(id), result.getData2List(TaskDTO.class));
-        failTaskMonitorMap.remove(id);
-    }
-
-    public static void stopProcess(JobContext jobContext) {
-        jobContext.setStop(true);
-        logger.info("------------ -V- -V- -V- 作业：【{}-{}】, 停止, 执行中任务仍继续执行 -V- -V- -V- ------------", jobContext.getJobId(), jobContext.getJobName());
-    }
-
 }
 

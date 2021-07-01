@@ -6,44 +6,26 @@ package com.mingyi.dataroute.persistence.node.vimport.po;
  */
 public class ImportPO {
 
-    private Integer processId;                         // 流程ID
-    private Integer nodeId;                            // 节点ID
-    private String filePath;                           // 文件地址
-    private String parseType;                          // 解析类型（0-JSON，1-CSV，2-CSVWithNames，3-TabSeparated, 4-TabSeparatedWithNames）
-    private String fields;                        // 列名称（以逗号分割）
+    private Integer id;                            // 节点ID
+    private String  filePath;                           // 文件地址
+    private String  parseType;                          // 解析类型（0-JSON，1-CSV，2-CSVWithNames，3-TabSeparated, 4-TabSeparatedWithNames）
+    private String  fields;                        // 列名称（以逗号分割）
     private Integer datasourceId;                      // 数据源ID
-    private String tableName;                          // 导入表名
-    private String handleType;                         // 处理类型（TRUNCATE， APPEND）
-    private String extraFields;                        // 额外的参数字段
+    private String  tableName;                          // 导入表名
+    private String  sinkDbType;                         // 处理类型（TRUNCATE， APPEND）
+    private String  extraFields;                        // 额外的参数字段
     private Integer bufferSize;                        // 缓存size
-    private Integer retryInterval;                     // 重试间隔（分）
-    private Integer maxRetryTimes;                     // 最大重试次数
-    private String remark;                             // 备注
     private Integer producerNumber;                    // 生产者数量
     private Integer consumerNumber;                    // 消费者数量
+    private String  remark;                             // 备注
 
-    public String getHandleType() {
-        return handleType;
+
+    public Integer getId() {
+        return id;
     }
 
-    public void setHandleType(String handleType) {
-        this.handleType = handleType;
-    }
-
-    public Integer getProcessId() {
-        return processId;
-    }
-
-    public void setProcessId(Integer processId) {
-        this.processId = processId;
-    }
-
-    public Integer getNodeId() {
-        return nodeId;
-    }
-
-    public void setNodeId(Integer nodeId) {
-        this.nodeId = nodeId;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getFilePath() {
@@ -86,6 +68,14 @@ public class ImportPO {
         this.tableName = tableName;
     }
 
+    public String getSinkDbType() {
+        return sinkDbType;
+    }
+
+    public void setSinkDbType(String sinkDbType) {
+        this.sinkDbType = sinkDbType;
+    }
+
     public String getExtraFields() {
         return extraFields;
     }
@@ -102,30 +92,6 @@ public class ImportPO {
         this.bufferSize = bufferSize;
     }
 
-    public Integer getRetryInterval() {
-        return retryInterval;
-    }
-
-    public void setRetryInterval(Integer retryInterval) {
-        this.retryInterval = retryInterval;
-    }
-
-    public Integer getMaxRetryTimes() {
-        return maxRetryTimes;
-    }
-
-    public void setMaxRetryTimes(Integer maxRetryTimes) {
-        this.maxRetryTimes = maxRetryTimes;
-    }
-
-    public String getRemark() {
-        return remark;
-    }
-
-    public void setRemark(String remark) {
-        this.remark = remark;
-    }
-
     public Integer getProducerNumber() {
         return producerNumber;
     }
@@ -140,5 +106,13 @@ public class ImportPO {
 
     public void setConsumerNumber(Integer consumerNumber) {
         this.consumerNumber = consumerNumber;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
     }
 }

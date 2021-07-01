@@ -1,9 +1,7 @@
 package com.mingyi.dataroute.persistence.node.bsql.mapper;
 
-import com.mingyi.dataroute.persistence.node.bsql.po.BSqlPO;
+import com.mingyi.dataroute.persistence.node.bsql.entity.BSqlPO;
 import org.apache.ibatis.annotations.Select;
-
-import java.util.List;
 
 /**
  * @author vbrug
@@ -13,8 +11,4 @@ public interface BSqlMapper {
 
     @Select("select * from d_node_bsql where id = #{0}")
     BSqlPO findById(Integer nodeId);
-
-    @Select("select id from d_node_bsql")
-    List<Integer> selectAll();
-
 }

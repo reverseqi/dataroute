@@ -1,5 +1,7 @@
 package com.mingyi.dataroute.executor;
 
+import com.vbrug.workflow.core.entity.TaskResult;
+
 /**
  * 任务执行接口
  *

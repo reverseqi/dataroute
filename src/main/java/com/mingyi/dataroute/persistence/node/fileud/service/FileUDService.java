@@ -12,6 +12,6 @@ public interface FileUDService {
     /**
      * 主键查询任务实体
      */
-    FileUDPO findById(Integer processId, Integer nodeId);
+    FileUDPO findById(Integer nodeId);
 
 }

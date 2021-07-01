@@ -1,7 +1,10 @@
 package com.mingyi.dataroute.executor.vimport;
 
 import com.mingyi.dataroute.db.datasource.DataSourcePool;
-import com.mingyi.dataroute.executor.*;
+import com.mingyi.dataroute.executor.Executor;
+import com.mingyi.dataroute.executor.ExecutorConstants;
+import com.mingyi.dataroute.executor.ParamParser;
+import com.mingyi.dataroute.executor.ParamTokenHandler;
 import com.mingyi.dataroute.persistence.node.vimport.po.ImportPO;
 import com.mingyi.dataroute.persistence.node.vimport.service.ImportService;
 import com.vbrug.fw4j.core.design.pc.Consumer;
@@ -10,6 +13,7 @@ import com.vbrug.fw4j.core.design.pc.Producer;
 import com.vbrug.fw4j.core.spring.SpringHelp;
 import com.vbrug.fw4j.core.thread.SignalLock;
 import com.vbrug.workflow.core.context.TaskContext;
+import com.vbrug.workflow.core.entity.TaskResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +38,8 @@ public class ImportExecutor implements Executor {
 
     @Override
     public TaskResult execute() throws Exception {
+        TaskResult taskResult = TaskResult.newInstance(taskContext.getTaskId());
+
         // 01-查询任务实体
         ImportPO importPO = SpringHelp.getBean(ImportService.class).findById(taskContext.getNodeId());
 
@@ -41,14 +47,14 @@ public class ImportExecutor implements Executor {
         importPO.setFilePath(ParamParser.parseParam(importPO.getFilePath(), new ParamTokenHandler(taskContext)));
 
         // 03-判断导入处理类型
-        if (importPO.getHandleType().equalsIgnoreCase(ExecutorConstants.SINK_DB_TYPE_TRUNCATE)) {
+        if (importPO.getSinkDbType().equalsIgnoreCase(ExecutorConstants.SINK_DB_TYPE_TRUNCATE)) {
             this.truncateMdTable(importPO);
             logger.info("任务--> {}--{}，清空中间表 {}", taskContext.getTaskId(), taskContext.getTaskName(), importPO.getTableName());
         }
 
         // 04-执行数据导入
         this.importData(importPO);
-        return null;
+        return taskResult.setPrecondition(TaskResult.PRECONDITION_YES);
     }
 
 

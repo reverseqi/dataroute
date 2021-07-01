@@ -1,8 +1,6 @@
 package com.mingyi.dataroute.persistence.node.bsql.service;
 
-import com.mingyi.dataroute.persistence.node.bsql.po.BSqlPO;
-
-import java.util.List;
+import com.mingyi.dataroute.persistence.node.bsql.entity.BSqlPO;
 
 /**
  * @author vbrug
@@ -17,6 +15,4 @@ public interface BSqlService {
      * @return 任务实体
      */
     BSqlPO findById(Integer nodeId);
-
-    List<Integer> selectAll();
 }

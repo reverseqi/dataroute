@@ -2,10 +2,10 @@ package com.mingyi.dataroute.executor.export;
 
 import com.mingyi.dataroute.db.datasource.DataSourcePool;
 import com.mingyi.dataroute.db.datasource.JobDataSource;
-import com.mingyi.dataroute.executor.ExecutorConstants;
-import com.mingyi.dataroute.persistence.node.export.po.ExportPO;
+import com.mingyi.dataroute.persistence.node.export.entity.ExportPO;
 import com.vbrug.fw4j.common.util.FileUtil;
 import com.vbrug.workflow.core.context.TaskContext;
+import com.vbrug.workflow.core.entity.TaskResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,9 +41,9 @@ public class ExportRunner {
         this.taskContext = taskContext;
     }
 
-    public void run() throws SQLException, IOException {
+    public Long run(TaskResult taskResult) throws SQLException, IOException {
 
-        Long count = Long.valueOf(0);
+        Long counter = 0L;
 
         // 初始化
         JobDataSource dataSource = DataSourcePool.getInstance().getDataSource(po.getDatasourceId());
@@ -60,18 +60,19 @@ public class ExportRunner {
                     map.put(metaData.getColumnName(i).toUpperCase(), rs.getObject(i));
                 }
                 this.write(dataSource.getDialect().jdbcType2String(map));
-                count++;
-                if (count % 10000 == 0) {
+                counter++;
+                if (counter % 10000 == 0) {
                     bos.flush();
-                    logger.info("【{}--{}】已导出数据量：{}", taskContext.getTaskId(), taskContext.getTaskName(), count);
+                    logger.info("【{}--{}】已导出数据量：{}", taskContext.getTaskId(), taskContext.getTaskName(), counter);
                 }
             }
         } finally {
             rs.close();
             bos.close();
         }
-        taskContext.getDataMap().put(ExecutorConstants.EXPORT_FILE_PATH, po.getFilePath());
-        logger.info("【{}--{}】，导出完成，总计导出：{}", taskContext.getTaskId(), taskContext.getTaskName(), count);
+        logger.info("【{}--{}】，导出完成，总计导出：{}", taskContext.getTaskId(), taskContext.getTaskName(), counter);
+        taskResult.getData().add(po.getResultParamName(), po.getFilePath());
+        return counter;
     }
 
     public void write(Map<String, String> map) throws IOException {

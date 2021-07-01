@@ -1,6 +1,6 @@
 package com.mingyi.dataroute.persistence.node.export.mapper;
 
-import com.mingyi.dataroute.persistence.node.export.po.ExportPO;
+import com.mingyi.dataroute.persistence.node.export.entity.ExportPO;
 import org.apache.ibatis.annotations.Select;
 
 /**
@@ -9,7 +9,7 @@ import org.apache.ibatis.annotations.Select;
  */
 public interface ExportMapper {
 
-    @Select("select * from d_node_export where node_id = #{0}")
+    @Select("select * from d_node_export where id = #{0}")
     ExportPO findById(Integer nodeId);
 
 }
