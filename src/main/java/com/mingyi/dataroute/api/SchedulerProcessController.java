@@ -29,6 +29,7 @@ public class SchedulerProcessController {
         return service.deleteJob(id);
     }
 
+
     @RequestMapping("standByScheduler")
     public String standByJob()  {
 
