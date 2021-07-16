@@ -1,13 +1,10 @@
 package com.mingyi.dataroute.executor.http;
 
-import com.vbrug.workflow.core.context.TaskContext;
-import com.mingyi.dataroute.executor.ParamParser;
-import com.mingyi.dataroute.executor.ParamTokenHandler;
-import com.mingyi.dataroute.persistence.node.http.po.HttpPO;
-import com.vbrug.fw4j.common.third.http.HttpHelp;
-import com.vbrug.fw4j.common.third.http.PostRequest;
 import com.vbrug.fw4j.common.util.JacksonUtils;
 import com.vbrug.fw4j.common.util.StringUtils;
+import com.vbrug.fw4j.common.util.third.http.HttpHelp;
+import com.vbrug.fw4j.common.util.third.http.PostRequest;
+import com.vbrug.workflow.core.context.TaskContext;
 import org.apache.http.client.config.RequestConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +14,7 @@ import java.net.SocketTimeoutException;
 import java.util.Map;
 
 /**
+ * 服务请求
  * @author vbrug
  * @since 1.0.0
  */
@@ -24,16 +22,20 @@ public class HttpRunner {
 
     private final static Logger logger = LoggerFactory.getLogger(HttpRunner.class);
 
-    private final HttpPO      httpPO;
-    private final TaskContext taskContext;
+    private final HttpConfigure configure;
+    private final TaskContext   taskContext;
 
-    HttpRunner(TaskContext taskContext, HttpPO httpPO) {
+    HttpRunner(TaskContext taskContext, HttpConfigure configure) {
         this.taskContext = taskContext;
-        this.httpPO = httpPO;
+        this.configure = configure;
     }
 
-    public void run() throws IOException {
-        PostRequest postRequest = HttpHelp.createPostRequest(httpPO.getUrl());
+    /**
+     * 执行请求
+     * @throws IOException 异常
+     */
+    public void execute() throws IOException {
+        PostRequest postRequest = HttpHelp.createPostRequest(configure.getPo().getUrl());
         this.setHeader(postRequest);
         this.setParam(postRequest);
         this.setConfig(postRequest);
@@ -45,26 +47,38 @@ public class HttpRunner {
         }
     }
 
+    /**
+     * 设置请求头
+     * @param postRequest 请求实体
+     */
     private void setHeader(PostRequest postRequest) {
-        if (!StringUtils.hasText(httpPO.getHeader())) return;
-        Map<String, String> map = JacksonUtils.json2Map(httpPO.getHeader(), String.class, String.class);
+        if (!StringUtils.hasText(configure.getPo().getHeader())) return;
+        Map<String, String> map = JacksonUtils.json2Map(configure.getPo().getHeader(), String.class, String.class);
         map.keySet().iterator().forEachRemaining(x -> {
             postRequest.addHeader(String.valueOf(x), String.valueOf(map.get(x)));
         });
     }
 
+    /**
+     * 设置请求参数
+     * @param postRequest 请求实体
+     */
     private void setParam(PostRequest postRequest) {
-        if (!StringUtils.hasText(httpPO.getParams())) return;
-        Map<String, String> map = JacksonUtils.json2Map(ParamParser.parseParam(httpPO.getParams(), new ParamTokenHandler(taskContext)), String.class, String.class);
+        if (!StringUtils.hasText(configure.getPo().getParams())) return;
+        Map<String, String> map = JacksonUtils.json2Map(configure.getPo().getParams(), String.class, String.class);
         map.keySet().iterator().forEachRemaining(x -> {
             postRequest.putParam(String.valueOf(x), String.valueOf(map.get(x)));
         });
         logger.info("【{}--{}】，请求参数: {}", taskContext.getTaskId(), taskContext.getTaskName(), map);
     }
 
+    /**
+     * 设置配置信息
+     * @param postRequest 请求实体
+     */
     private void setConfig(PostRequest postRequest) {
-        if (!StringUtils.hasText(httpPO.getConfigure())) return;
-        Map<String, String>   map           = JacksonUtils.json2Map(httpPO.getConfigure(), String.class, String.class);
+        if (!StringUtils.hasText(configure.getPo().getConfigure())) return;
+        Map<String, String>   map           = JacksonUtils.json2Map(configure.getPo().getConfigure(), String.class, String.class);
         RequestConfig.Builder configBuilder = postRequest.getConfigBuilder();
         if (map.containsKey("socketTimeout"))
             configBuilder.setSocketTimeout(Integer.parseInt(String.valueOf(map.get("socketTimeout"))));

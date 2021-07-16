@@ -1,8 +1,8 @@
 package com.mingyi.dataroute;
 
 import com.vbrug.fw4j.common.util.IOUtils;
-import com.vbrug.fw4j.core.env.ApplicationContext;
-import com.vbrug.fw4j.core.env.SystemEnvironment;
+import com.vbrug.fw4j.common.env.ApplicationContext;
+import com.vbrug.fw4j.common.env.SystemEnvironment;
 import com.vbrug.fw4j.core.spring.SpringHelp;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;

@@ -2,8 +2,8 @@ package com.mingyi.dataroute.wfcall;
 
 import com.mingyi.dataroute.exceptions.DataRouteException;
 import com.mingyi.dataroute.executor.ExecutorFactory;
+import com.vbrug.fw4j.common.entity.Result;
 import com.vbrug.fw4j.common.util.StringUtils;
-import com.vbrug.fw4j.core.entity.Result;
 import com.vbrug.workflow.core.WorkFlowEngine;
 import com.vbrug.workflow.core.context.JobContext;
 import com.vbrug.workflow.core.context.TaskContext;
@@ -134,8 +134,6 @@ public class WorkFlowCallService {
                     taskElapsedTimeWatch.stop();
                 }
                 logger.info("【{}-{}】，结束，任务耗时：{}", taskContext.getTaskId(), taskContext.getTaskName(), taskElapsedTimeWatch.getTotalTimeSeconds());
-                logger.info("------------ -V- -V- -V- 作业【{}-{}】停止，不再执行后续任务 -V- -V- -V- ------------", jobContext.getJobId(), jobContext.getJobName());
-
             }).start();
         }
     }

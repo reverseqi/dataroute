@@ -1,6 +1,6 @@
 package com.mingyi.dataroute.executor.extract;
 
-import com.mingyi.dataroute.persistence.node.extract.po.ExtractPO;
+import com.mingyi.dataroute.executor.ExecutorConstants;
 import com.mingyi.dataroute.persistence.node.extract.service.ExtractService;
 import com.vbrug.fw4j.common.util.CollectionUtils;
 import com.vbrug.fw4j.common.util.JacksonUtils;
@@ -10,7 +10,6 @@ import com.vbrug.workflow.core.context.TaskContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
@@ -26,9 +25,9 @@ public class ExtractRunner {
     private final TaskContext      taskContext;
     private final ExtractConfigure configure;
 
-    public ExtractRunner(ExtractPO po, TaskContext taskContext) throws SQLException, IOException {
+    public ExtractRunner(ExtractConfigure configure, TaskContext taskContext) {
         this.taskContext = taskContext;
-        this.configure = new ExtractConfigure(po, taskContext);
+        this.configure = configure;
     }
 
     /**
@@ -53,39 +52,37 @@ public class ExtractRunner {
     }
 
     /**
-     * 清空中间表
-     */
-    public void truncateTargetTable() throws SQLException {
-        String truncateTargetSQL = configure.buildTruncateTargetSQL();
-        configure.getTargetDataSource().getSqlRunner().run(truncateTargetSQL);
-        logger.info("【{}--{}】，清空目标表 --> {}", taskContext.getTaskId(), taskContext.getTaskName(), truncateTargetSQL);
-    }
-
-    /**
      * 数据抽取
      */
     public long extractData() throws Exception {
+        // 01-判断抽取数据是否需清空目标表
+        if (configure.getPo().getSinkDbType().equalsIgnoreCase(ExecutorConstants.SINK_DB_TYPE_TRUNCATE)) {
+            this.truncateTargetTable();
+        }
 
+        // 02-开始抽取数据
         // 消费者
-        ExtractConsumer consumer = new ExtractConsumer(this.configure, new AtomicLong(0L), configure.getExtractAmount());
+        ExtractConsumerTask consumer = new ExtractConsumerTask(this.configure, this.taskContext, new AtomicLong(0L), configure.getExtractAmount());
 
         // 生产者
-        ExtractProducer producer = new ExtractProducer(configure.buildExtractSQL(),
+        ExtractProducerTask producer = new ExtractProducerTask(configure.buildExtractSQL(),
                 configure.getCondField().getMinValue(), configure.getCondField().getMaxValue(),
-                configure, new AtomicLong(0L));
+                configure, this.taskContext, new AtomicLong(0L));
 
-        // 启动生产消费者线程池
+        // 启动生产消费者线程进行抽取
         new PCPool<List<Map<String, String>>>(String.valueOf(taskContext.getJobContext().getJobId())).setDequeMaxSize(configure.getDequeMaxSize())
                 .push(consumer.split(configure.getPo().getConsumerNumber()))
                 .push(producer.split(configure.getPo().getProducerNumber())).run();
 
+        // 03-更新抽取条件
+        this.updateTrigger();
         return configure.getExtractAmount();
     }
 
     /**
      * 更新触发条件
      */
-    public void updateTrigger() throws SQLException {
+    private void updateTrigger() throws SQLException {
         ExtractField condField = configure.getCondField();
         switch (condField.getProperty().toUpperCase()) {
             case ExtractConfigure.FIELD_PROPERTY_RANGE:
@@ -99,5 +96,15 @@ public class ExtractRunner {
         String condFieldJSON = JacksonUtils.bean2Json(condField);
         SpringHelp.getBean(ExtractService.class).updateTriggerValue(taskContext.getNodeId(), condFieldJSON);
         logger.info("【{}--{}】，更新同步条件{}。", taskContext.getTaskId(), taskContext.getTaskName(), condFieldJSON);
+    }
+
+
+    /**
+     * 清空中间表
+     */
+    private void truncateTargetTable() throws SQLException {
+        String truncateTargetSQL = configure.buildTruncateTargetSQL();
+        configure.getTargetDataSource().getSqlRunner().run(truncateTargetSQL);
+        logger.info("【{}--{}】，清空目标表 --> {}", taskContext.getTaskId(), taskContext.getTaskName(), truncateTargetSQL);
     }
 }

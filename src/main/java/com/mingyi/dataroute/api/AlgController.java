@@ -1,8 +1,8 @@
 package com.mingyi.dataroute.api;
 
 import com.mingyi.dataroute.executor.http.HttpExecutor;
-import com.vbrug.fw4j.common.third.http.HttpHelp;
-import com.vbrug.fw4j.common.third.http.PostRequest;
+import com.vbrug.fw4j.common.util.third.http.HttpHelp;
+import com.vbrug.fw4j.common.util.third.http.PostRequest;
 import com.vbrug.fw4j.core.thread.SignalLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +35,7 @@ public class AlgController {
         String status = (String) params.get("status");
         if ("0".equals(status)) {
             TimeUnit.SECONDS.sleep(5);
-            SignalLock lock = HttpExecutor.lockMap.get(jobId + taskId);
+            SignalLock lock = HttpExecutor.asyncLockMap.get(jobId + taskId);
             lock.lock();
             try {
                 lock.signal();

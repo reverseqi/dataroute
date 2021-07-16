@@ -1,7 +1,7 @@
 package com.mingyi.dataroute.executor.extract;
 
+import com.mingyi.dataroute.executor.ContextParamParser;
 import com.mingyi.dataroute.executor.Executor;
-import com.mingyi.dataroute.executor.ExecutorConstants;
 import com.mingyi.dataroute.persistence.node.extract.po.ExtractPO;
 import com.mingyi.dataroute.persistence.node.extract.service.ExtractService;
 import com.vbrug.fw4j.common.util.StringUtils;
@@ -10,6 +10,9 @@ import com.vbrug.workflow.core.context.TaskContext;
 import com.vbrug.workflow.core.entity.TaskResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.sql.SQLException;
 
 /**
  * 抽取执行器
@@ -28,10 +31,8 @@ public class ExtractExecutor implements Executor {
 
     @Override
     public TaskResult execute() throws Exception {
-        // 01-初始化变量
-        ExtractService persistenceService = SpringHelp.getBean(ExtractService.class);
-        ExtractPO      extractPO          = persistenceService.findById(taskContext.getNodeId());
-        ExtractRunner  extractRunner      = new ExtractRunner(extractPO, taskContext);
+        // 01-构建执行器
+        ExtractRunner extractRunner = this.buildRunner();
 
         // 02-判断是否有新数据
         if (!extractRunner.hasNewData()) {
@@ -40,18 +41,26 @@ public class ExtractExecutor implements Executor {
             return TaskResult.newInstance(taskContext.getTaskId()).setPrecondition(TaskResult.PRECONDITION_TWO);
         }
 
-        // 03-判断是否需要清空中间表
-        if (extractPO.getSinkDbType().equalsIgnoreCase(ExecutorConstants.SINK_DB_TYPE_TRUNCATE)) {
-            extractRunner.truncateTargetTable();
-        }
-
-        // 03-数据消费生产
+        // 03-抽取数据
         long extractAmount = extractRunner.extractData();
-
-        // 05-更新触发日期
-        extractRunner.updateTrigger();
         return TaskResult.newInstance(taskContext.getTaskId()).setPrecondition(TaskResult.PRECONDITION_YES)
                 .setRemark(StringUtils.replacePlaceholder("此次共抽取{}", extractAmount));
     }
 
+    /**
+     * 构建执行器
+     * @return 结果
+     */
+    private ExtractRunner buildRunner() throws SQLException, IOException {
+        // 查询抽取对象实体
+        ExtractPO extractPO = SpringHelp.getBean(ExtractService.class).findById(taskContext.getNodeId());
+
+        // 处理环境变量
+        extractPO.setOriginTable(ContextParamParser.parseParam(extractPO.getOriginTable(), taskContext));
+        extractPO.setTargetTable(ContextParamParser.parseParam(extractPO.getTargetTable(), taskContext));
+        extractPO.setExtractBatchFields(ContextParamParser.parseParam(extractPO.getExtractBatchFields(), taskContext));
+
+        // 构建配置类
+        return new ExtractRunner(new ExtractConfigure(extractPO), taskContext);
+    }
 }
