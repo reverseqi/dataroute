@@ -1,11 +1,13 @@
 package com.mingyi.dataroute.executor;
 
+import com.mingyi.dataroute.exceptions.DataRouteException;
 import com.mingyi.dataroute.executor.bsql.BSqlExecutor;
 import com.mingyi.dataroute.executor.export.ExportExecutor;
 import com.mingyi.dataroute.executor.extract.ExtractExecutor;
 import com.mingyi.dataroute.executor.fileud.FileUDExecutor;
 import com.mingyi.dataroute.executor.http.HttpExecutor;
 import com.mingyi.dataroute.executor.vimport.ImportExecutor;
+import com.vbrug.fw4j.common.util.StringUtils;
 import com.vbrug.workflow.core.context.TaskContext;
 
 /**
@@ -16,7 +18,7 @@ public class ExecutorFactory {
 
     public static Executor createExecutor(TaskContext taskContext) {
 
-        switch (TaskType.getByValue(taskContext.getNodeType())) {
+        switch (ExecutorType.getByValue(taskContext.getNodeType())) {
             case EXTRACT:
                 return new ExtractExecutor(taskContext);
             case BSQL:
@@ -30,8 +32,8 @@ public class ExecutorFactory {
             case IMPORT:
                 return new ImportExecutor(taskContext);
             default:
-                return null;
         }
+        throw new DataRouteException(StringUtils.replacePlaceholder("{} 任务类型不存在", taskContext.getNodeType()));
 
     }
 

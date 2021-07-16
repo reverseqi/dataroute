@@ -1,9 +1,7 @@
 package com.mingyi.dataroute.executor.bsql;
 
+import com.mingyi.dataroute.executor.ContextParamParser;
 import com.mingyi.dataroute.executor.Executor;
-import com.mingyi.dataroute.executor.ParamParser;
-import com.mingyi.dataroute.executor.ParamTokenHandler;
-import com.mingyi.dataroute.executor.SQLParser;
 import com.mingyi.dataroute.persistence.node.bsql.entity.BSqlPO;
 import com.mingyi.dataroute.persistence.node.bsql.service.BSqlService;
 import com.vbrug.fw4j.core.spring.SpringHelp;
@@ -23,7 +21,6 @@ public class BSqlExecutor implements Executor {
 
     private static final Logger logger = LoggerFactory.getLogger(BSqlExecutor.class);
 
-
     private final TaskContext taskContext;
 
     public BSqlExecutor(TaskContext taskContext) {
@@ -36,16 +33,17 @@ public class BSqlExecutor implements Executor {
         // 01-查询任务实体
         BSqlPO bSqlPO = SpringHelp.getBean(BSqlService.class).findById(taskContext.getNodeId());
 
-        // 02-环境变量解析
-        bSqlPO.setBsqlPath(ParamParser.parseParam(bSqlPO.getBsqlPath(), new ParamTokenHandler(taskContext)));
-
-        // 03-解析xml
+        // 02-解析xml
         logger.info("【{}--{}】, 解析SQL文本：{}", taskContext.getTaskId(), taskContext.getTaskName(), bSqlPO.getBsqlPath());
-        List<BSqlBean> bSqlBeans = SQLParser.parseBSQL(bSqlPO.getBsqlPath());
+        List<BSqlBean> bSqlBeans = BSqlXMLParser.parseBSQL(bSqlPO.getBsqlPath());
+
+        // 03-环境变量解析
+        bSqlPO.setBsqlPath(ContextParamParser.parseParam(bSqlPO.getBsqlPath(), taskContext));
+        bSqlBeans.forEach(x -> x.setSql(ContextParamParser.parseParam(x.getSql(), taskContext)));
 
         // 04-执行Sql脚本
         logger.info("【{}--{}】, 开始执行sql脚本", taskContext.getTaskId(), taskContext.getTaskName());
-        new BSqlRunner(taskContext, bSqlPO).run(bSqlBeans);
+        new BsqlRunner(taskContext, bSqlPO).run(bSqlBeans);
 
         return taskResult.setPrecondition(TaskResult.PRECONDITION_YES).setRemark("");
     }

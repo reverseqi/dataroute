@@ -7,17 +7,26 @@ package com.mingyi.dataroute.persistence.resource.machine.po;
 public class MachinePO {
 
     private Integer id;                                // key
-    private String name;                               // 名称
-    private String host;                               // 地址
+    private String  name;                               // 名称
+    private String  host;                               // 地址
     private Integer port;                              // 端口
-    private String username;                           // 用户名
-    private String password;                           // 密码
+    private String  protocolType;                       // 协议类型（SSH、FTP）
+    private String  username;                           // 用户名
+    private String  password;                           // 密码
     private Integer stopFlag;                          // 停用状态（0-否，1-是）
-    private String remark;                             // 描述
-    private String createUser;                         // 创建用户
-    private String createTime;                         // 创建时间
-    private String updateUser;                         // 修改用户
-    private String updateTime;                         // 修改时间
+    private String  remark;                             // 描述
+    private String  createUser;                         // 创建用户
+    private String  createTime;                         // 创建时间
+    private String  updateUser;                         // 修改用户
+    private String  updateTime;                         // 修改时间
+
+    public String getProtocolType() {
+        return protocolType;
+    }
+
+    public void setProtocolType(String protocolType) {
+        this.protocolType = protocolType;
+    }
 
     public Integer getPort() {
         return port;

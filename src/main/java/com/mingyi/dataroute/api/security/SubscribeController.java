@@ -1,7 +1,7 @@
 package com.mingyi.dataroute.api.security;
 
-import com.vbrug.fw4j.common.third.http.HttpHelp;
-import com.vbrug.fw4j.common.third.http.PostRequest;
+import com.vbrug.fw4j.common.util.third.http.HttpHelp;
+import com.vbrug.fw4j.common.util.third.http.PostRequest;
 import com.vbrug.fw4j.common.util.CollectionUtils;
 import com.vbrug.fw4j.common.util.JacksonUtils;
 import org.slf4j.Logger;
@@ -26,7 +26,7 @@ public class SubscribeController {
     @RequestMapping(value = "startExecute", method = RequestMethod.POST)
     public Object startExecute(@RequestBody SubscribeDO condDO) {
         logger.info("【乱点订阅】, 请求参数: {}", JacksonUtils.bean2Json(condDO));
-        return CollectionUtils.createValueMap().add("status", "0").add("remark", "开始执行任务").build();
+        return CollectionUtils.createValueMap().add("status", "0").add("remark", "开始执行任务");
     }
 
     @RequestMapping(value = "callback")
