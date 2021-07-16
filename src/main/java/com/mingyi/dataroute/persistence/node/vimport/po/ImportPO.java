@@ -6,19 +6,18 @@ package com.mingyi.dataroute.persistence.node.vimport.po;
  */
 public class ImportPO {
 
-    private Integer id;                            // 节点ID
-    private String  filePath;                           // 文件地址
-    private String  parseType;                          // 解析类型（0-JSON，1-CSV，2-CSVWithNames，3-TabSeparated, 4-TabSeparatedWithNames）
-    private String  fields;                        // 列名称（以逗号分割）
-    private Integer datasourceId;                      // 数据源ID
-    private String  tableName;                          // 导入表名
-    private String  sinkDbType;                         // 处理类型（TRUNCATE， APPEND）
-    private String  extraFields;                        // 额外的参数字段
-    private Integer bufferSize;                        // 缓存size
-    private Integer producerNumber;                    // 生产者数量
-    private Integer consumerNumber;                    // 消费者数量
+    private Integer id;                                // 节点ID
+    private String  filePath;                           // 文件地址【支持作业环境变量解析】
+    private String  fileType;                           // 文件类型（JSON、CSV）
+    private String  fileParserParams;                        // 文件解析参数，格式为JSON串。所有文件共用参数（file_encoding-文件编码，包含UTF-8、GBK、GB2312等；is_line_to_hump-标题是否下划线转驼峰false、true）；CSV特有参数（first_row_is_header-首行是否为标题，false、true；value_separator-值分隔符号，quotation-引用符号）；JSON特有参数（one_line_contain_multi-一行是否包含多条数据，false、true；target_path-目标结果路径）
+    private Integer importDatasourceId;                // 数据源ID
+    private String  importTableName;                    // 导入表名【支持作业环境变量解析】
+    private String  importFields;                        // 列名称（以逗号分割）
+    private String  importBatchFields;                  // 批次字段
+    private String  sinkDbType;                         // 入库类型（TRUNCATE, APPEND）
+    private String  params;                             //JSON格式，可支持参数（buffer_insert_size--每次插入数量，deque_max_size--队列最大值）
+    private Integer consumerNumber;                    // 入库消费者数量
     private String  remark;                             // 备注
-
 
     public Integer getId() {
         return id;
@@ -36,36 +35,52 @@ public class ImportPO {
         this.filePath = filePath;
     }
 
-    public String getParseType() {
-        return parseType;
+    public String getFileType() {
+        return fileType;
     }
 
-    public void setParseType(String parseType) {
-        this.parseType = parseType;
+    public void setFileType(String fileType) {
+        this.fileType = fileType;
     }
 
-    public String getFields() {
-        return fields;
+    public String getFileParserParams() {
+        return fileParserParams;
     }
 
-    public void setFields(String fields) {
-        this.fields = fields;
+    public void setFileParserParams(String fileParserParams) {
+        this.fileParserParams = fileParserParams;
     }
 
-    public Integer getDatasourceId() {
-        return datasourceId;
+    public Integer getImportDatasourceId() {
+        return importDatasourceId;
     }
 
-    public void setDatasourceId(Integer datasourceId) {
-        this.datasourceId = datasourceId;
+    public void setImportDatasourceId(Integer importDatasourceId) {
+        this.importDatasourceId = importDatasourceId;
     }
 
-    public String getTableName() {
-        return tableName;
+    public String getImportTableName() {
+        return importTableName;
     }
 
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
+    public void setImportTableName(String importTableName) {
+        this.importTableName = importTableName;
+    }
+
+    public String getImportFields() {
+        return importFields;
+    }
+
+    public void setImportFields(String importFields) {
+        this.importFields = importFields;
+    }
+
+    public String getImportBatchFields() {
+        return importBatchFields;
+    }
+
+    public void setImportBatchFields(String importBatchFields) {
+        this.importBatchFields = importBatchFields;
     }
 
     public String getSinkDbType() {
@@ -76,28 +91,12 @@ public class ImportPO {
         this.sinkDbType = sinkDbType;
     }
 
-    public String getExtraFields() {
-        return extraFields;
+    public String getParams() {
+        return params;
     }
 
-    public void setExtraFields(String extraFields) {
-        this.extraFields = extraFields;
-    }
-
-    public Integer getBufferSize() {
-        return bufferSize;
-    }
-
-    public void setBufferSize(Integer bufferSize) {
-        this.bufferSize = bufferSize;
-    }
-
-    public Integer getProducerNumber() {
-        return producerNumber;
-    }
-
-    public void setProducerNumber(Integer producerNumber) {
-        this.producerNumber = producerNumber;
+    public void setParams(String params) {
+        this.params = params;
     }
 
     public Integer getConsumerNumber() {

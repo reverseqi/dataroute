@@ -6,12 +6,16 @@ package com.mingyi.dataroute.persistence.node.http.po;
  */
 public class HttpPO {
 
-    private Integer id;                            // 节点ID
-    private String  url;                                // 请求路径
-    private String  params;                             // 请求参数
-    private String  configure;                          // 配置参数
-    private String  header;                             // 请求头
-    private String  remark;                             // 日志
+    private Integer id;                                // 节点ID
+    private String url;                                // 请求路径
+    private String sourceType;                         // 数据源类型（CONTEXT-作业环境变量，DB-数据库）
+    private String params;                             // 请求参数,JSON格式【支持作业环境变量解析】
+    private String configure;                          // 配置参数
+    private String header;                             // 请求头
+    private String handleType;                         // 处理类型（SYNC--同步，ASYNC--异步）
+    private String sinkType;                           // 结果输出类型（CONTEXT-作业环境变量，MAP-集合，KAFKA-消息队列）
+    private String resultParamName;                    // 环境变量名称（空时默认为resultFilePath）
+    private String remark;                             // 备注
 
     public Integer getId() {
         return id;
@@ -27,6 +31,14 @@ public class HttpPO {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public String getSourceType() {
+        return sourceType;
+    }
+
+    public void setSourceType(String sourceType) {
+        this.sourceType = sourceType;
     }
 
     public String getParams() {
@@ -51,6 +63,30 @@ public class HttpPO {
 
     public void setHeader(String header) {
         this.header = header;
+    }
+
+    public String getHandleType() {
+        return handleType;
+    }
+
+    public void setHandleType(String handleType) {
+        this.handleType = handleType;
+    }
+
+    public String getSinkType() {
+        return sinkType;
+    }
+
+    public void setSinkType(String sinkType) {
+        this.sinkType = sinkType;
+    }
+
+    public String getResultParamName() {
+        return resultParamName;
+    }
+
+    public void setResultParamName(String resultParamName) {
+        this.resultParamName = resultParamName;
     }
 
     public String getRemark() {

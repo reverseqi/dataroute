@@ -1,7 +1,7 @@
 package com.vbrug.fw4j.core.thread;
 
 
-import com.vbrug.fw4j.common.third.http.HttpUtil;
+import com.vbrug.fw4j.common.util.third.http.HttpUtil;
 import com.vbrug.fw4j.common.thread.FixedThreadPool;
 
 import java.util.Map;

@@ -1,21 +1,15 @@
 package com.mingyi.dataroute.executor.extract;
 
 import com.mingyi.dataroute.db.DataType;
-import com.mingyi.dataroute.db.Field;
 import com.mingyi.dataroute.db.datasource.DataSourcePool;
 import com.mingyi.dataroute.db.datasource.JobDataSource;
 import com.mingyi.dataroute.db.dialect.Dialect;
 import com.mingyi.dataroute.executor.ExecutorConstants;
-import com.mingyi.dataroute.executor.ParamParser;
-import com.mingyi.dataroute.executor.ParamTokenHandler;
 import com.mingyi.dataroute.persistence.node.extract.po.ExtractPO;
 import com.vbrug.fw4j.common.util.*;
-import com.vbrug.workflow.core.context.TaskContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -37,21 +31,20 @@ public class ExtractConfigure {
     protected static final String FIELD_MAX_VALUE                = "MAX_VALUE";
     protected static final String FIELD_EXTRACT_AMOUNT           = "EXTRACT_AMOUNT";
 
+
     private final ExtractPO          po;
-    private final TaskContext        taskContext;
     private final JobDataSource      originDataSource;
     private final JobDataSource      targetDataSource;
     private       ExtractField       condField;
     private       List<ExtractField> extractFieldList;
-    private       List<ExtractField> batchFieldList;
+    private       List<ExtractField> extractBatchFieldList;
     private       int                bufferFetchSize  = 500;
     private       int                bufferInsertSize = 500;
     private       int                dequeMaxSize     = 5;
     private       long               extractAmount;
 
-    ExtractConfigure(ExtractPO po, TaskContext taskContext) throws SQLException, IOException {
+    ExtractConfigure(ExtractPO po) {
         this.po = po;
-        this.taskContext = taskContext;
         this.originDataSource = DataSourcePool.getInstance().getDataSource(po.getOriginDatasource());
         this.targetDataSource = DataSourcePool.getInstance().getDataSource(po.getTargetDatasource());
         // 解析字段
@@ -64,32 +57,28 @@ public class ExtractConfigure {
      */
     private void parseParams() {
         // 01-解析抽取字段、抽取条件字段
-        Assert.notNull(po.getExtractField(), "抽取字段列名称为空");
-        this.extractFieldList = JacksonUtils.jsonToList(po.getExtractField(), ExtractField.class);
+        Assert.notNull(po.getExtractFields(), "抽取字段列名称为空");
+        this.extractFieldList = JacksonUtils.jsonToList(po.getExtractFields(), ExtractField.class);
         Assert.notNull(po.getExtractCondField(), "抽取条件字段为空");
         this.condField = JacksonUtils.json2Bean(po.getExtractCondField(), ExtractField.class);
 
         // 02-批次标识字段解析，获取常量值，或者从作业环境信息中获取
-        if (StringUtils.hasText(po.getExtractBatchField())) {
-            batchFieldList = JacksonUtils.jsonToList(po.getExtractBatchField(), ExtractField.class);
-            for (ExtractField batchField : batchFieldList) {
-                if (batchField.getProperty().toUpperCase().equals(Field.PROPERTY_CONSTANT)
-                        && (batchField.getValue().contains("$"))) {
-                    batchField.setValue(ParamParser.parseParam(batchField.getValue(), new ParamTokenHandler(taskContext)));
-                }
-            }
+        if (StringUtils.hasText(po.getExtractBatchFields())) {
+            extractBatchFieldList = JacksonUtils.jsonToList(po.getExtractBatchFields(), ExtractField.class);
         }
         // 03-配置参数解析
-        Map<String, String> paramMap = JacksonUtils.json2Map(po.getParams(), String.class, String.class);
-        if (!CollectionUtils.isEmpty(paramMap)) {
-            if (paramMap.containsKey("buffer_fetch_size")) {
-                this.bufferFetchSize = Integer.parseInt(paramMap.get("buffer_fetch_size"));
-            }
-            if (paramMap.containsKey("buffer_insert_size")) {
-                this.bufferInsertSize = Integer.parseInt(paramMap.get("buffer_insert_size"));
-            }
-            if (paramMap.containsKey("deque_max_size")) {
-                this.dequeMaxSize = Integer.parseInt(paramMap.get("deque_max_size"));
+        if (StringUtils.hasText(po.getParams())) {
+            Map<String, String> paramMap = JacksonUtils.json2Map(po.getParams(), String.class, String.class);
+            if (!CollectionUtils.isEmpty(paramMap)) {
+                if (paramMap.containsKey(ExecutorConstants.PARAM_BUFFER_FETCH_SIZE)) {
+                    this.bufferFetchSize = Integer.parseInt(paramMap.get(ExecutorConstants.PARAM_BUFFER_FETCH_SIZE));
+                }
+                if (paramMap.containsKey(ExecutorConstants.PARAM_BUFFER_INSERT_SIZE)) {
+                    this.bufferInsertSize = Integer.parseInt(paramMap.get(ExecutorConstants.PARAM_BUFFER_INSERT_SIZE));
+                }
+                if (paramMap.containsKey(ExecutorConstants.PARAM_DEQUE_MAX_SIZE)) {
+                    this.dequeMaxSize = Integer.parseInt(paramMap.get(ExecutorConstants.PARAM_DEQUE_MAX_SIZE));
+                }
             }
         }
     }
@@ -103,7 +92,7 @@ public class ExtractConfigure {
         List<String> condList      = new ArrayList<>();
         Dialect      originDialect = originDataSource.getDialect();
         // 01-字段处理
-        String maxValueField, minValueExp = null, maxValueExp = null;
+        String minValueExp = null, maxValueExp = null;
         switch (condField.getDataType()) {
             case DATETIME:
                 minValueExp = originDialect.funcStringToDate(condField.getMinValue());
@@ -201,10 +190,6 @@ public class ExtractConfigure {
         return po;
     }
 
-    public TaskContext getTaskContext() {
-        return taskContext;
-    }
-
     public JobDataSource getOriginDataSource() {
         return originDataSource;
     }
@@ -237,8 +222,8 @@ public class ExtractConfigure {
         return extractFieldList;
     }
 
-    public List<ExtractField> getBatchFieldList() {
-        return batchFieldList;
+    public List<ExtractField> getExtractBatchFieldList() {
+        return extractBatchFieldList;
     }
 
     public int getDequeMaxSize() {

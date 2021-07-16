@@ -4,17 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-public class XNode {
+public class XMLNode {
 
-    private String name;
-
-    private String body;
-
-    private Properties attributes = new Properties();
-
-    private Properties variables = new Properties();
-
-    private List<XNode> children = new ArrayList<>();
+    private String        name;
+    private String        body;
+    private Properties    attributes = new Properties();
+    private Properties    variables  = new Properties();
+    private List<XMLNode> children   = new ArrayList<>();
 
     public String getName() {
         return name;
@@ -48,12 +44,12 @@ public class XNode {
         this.variables = variables;
     }
 
-    public List<XNode> getChildren() {
+    public List<XMLNode> getChildren() {
         return children;
     }
 
     public void setChildren(
-            List<XNode> children) {
+            List<XMLNode> children) {
         this.children = children;
     }
 

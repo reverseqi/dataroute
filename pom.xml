@@ -30,21 +30,8 @@
             <artifactId>fw4j-common</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
-        <dependency>
-            <groupId>com.vbrug.fw4j</groupId>
-            <artifactId>fw4j-core</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-        </dependency>
-    
-        <!-- workflow -->
-<!--
-        <dependency>
-            <groupId>com.vbrug.workflow</groupId>
-            <artifactId>workflow-starter</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-        </dependency>
--->
         
+        <!-- workflow -->
         <dependency>
             <groupId>com.vbrug.workflow</groupId>
             <artifactId>workflow-core</artifactId>
